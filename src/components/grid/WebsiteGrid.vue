@@ -27,8 +27,8 @@ const localWebsites = computed({
     return filteredWebsites.value
   },
   set(value) {
-    // Trigger haptic on drop
-    triggerHaptic('selection')
+    // Trigger spring-synchronized haptic on drop
+    triggerHaptic('dragEnd')
 
     // Update positions when drag ends
     const currentPage = websitesStore.currentPage
@@ -71,7 +71,9 @@ function triggerHaptic(style = 'medium') {
       light: [10],
       medium: [20],
       heavy: [30],
-      selection: [10, 50, 10]
+      selection: [10, 50, 10],
+      dragStart: [15],
+      dragEnd: [10, 40, 10]
     }
     navigator.vibrate(patterns[style] || patterns.medium)
   }
@@ -116,14 +118,14 @@ onUnmounted(() => {
       v-if="hasResults"
       v-model="localWebsites"
       class="website-grid"
-      :animation="300"
+      :animation="350"
       :disabled="!uiStore.isEditMode || isSearching"
       ghost-class="ghost"
       drag-class="drag"
       chosen-class="chosen"
       :force-fallback="true"
       item-key="id"
-      @start="() => console.log('Drag started')"
+      @start="() => { triggerHaptic('dragStart'); console.log('Drag started') }"
       @end="() => console.log('Drag ended')"
     >
       <template #item="{ element, index }">
@@ -187,6 +189,13 @@ onUnmounted(() => {
   max-width: 100%;
 }
 
+/* Enable smooth reflow for all grid items */
+.website-grid > * {
+  transition: transform var(--transition-icon-reflow),
+              opacity var(--transition-fast);
+  will-change: transform;
+}
+
 /* Edit Mode Container */
 .edit-mode-container {
   position: fixed;
@@ -238,6 +247,7 @@ onUnmounted(() => {
 .website-grid :deep(.ghost) {
   opacity: 0.2;
   transform: scale(0.95);
+  transition: opacity 0.15s ease-out, transform 0.15s ease-out;
 }
 
 .website-grid :deep(.drag) {
@@ -246,11 +256,20 @@ onUnmounted(() => {
   z-index: var(--z-modal);
   filter: drop-shadow(0 20px 50px rgba(0, 0, 0, 0.4));
   cursor: grabbing !important;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+              filter 0.2s ease-out;
 }
 
 .website-grid :deep(.chosen) {
   transform: scale(1.05);
   filter: drop-shadow(0 15px 40px rgba(0, 0, 0, 0.35));
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+              filter 0.2s ease-out;
+}
+
+/* Prevent transition conflicts during wiggle */
+.website-grid :deep(.wiggle):not(.drag):not(.ghost):not(.chosen) {
+  transition: none;
 }
 
 .empty-state {

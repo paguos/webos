@@ -210,12 +210,13 @@ function handleImageError() {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: transform var(--transition-bounce),
-              box-shadow var(--transition-base);
+  transition: box-shadow var(--transition-base);
+  /* Transform now handled by parent grid during drag */
 }
 
 .website-icon.in-edit-mode {
   cursor: grab;
+  transform: none; /* Let grid control position */
 }
 
 .website-icon.in-edit-mode:active {
@@ -225,10 +226,13 @@ function handleImageError() {
 .website-icon:hover:not(.in-edit-mode) {
   transform: scale(1.1) translateY(-5px);
   box-shadow: var(--icon-hover-shadow);
+  transition: transform var(--transition-bounce),
+              box-shadow var(--transition-base);
 }
 
 .website-icon:active:not(.in-edit-mode) {
   transform: scale(0.95);
+  transition: transform var(--transition-fast);
 }
 
 .icon-image {

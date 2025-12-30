@@ -320,10 +320,11 @@ ul, ol {
   user-select: none;
 }
 
-/* Draggable */
+/* Draggable - Enhanced for performance */
 .draggable {
   cursor: move;
   cursor: grab;
+  will-change: transform;
 }
 
 .draggable:active {
@@ -331,12 +332,17 @@ ul, ol {
 }
 
 .ghost {
-  opacity: 0.5;
+  opacity: 0.2;
   transform: scale(0.95);
+  transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+  will-change: opacity, transform;
 }
 
 .drag {
   transform: scale(1.05);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
   z-index: var(--z-modal);
+  will-change: transform, box-shadow;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.2s ease-out;
 }
