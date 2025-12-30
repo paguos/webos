@@ -12,7 +12,8 @@ const formData = ref({
   url: '',
   categoryId: null,
   customIcon: '',
-  iconZoom: 1
+  iconZoom: 1,
+  iconBackgroundColor: 'transparent'
 })
 
 const errors = ref({
@@ -30,7 +31,8 @@ watch(() => uiStore.editingWebsite, (website) => {
       url: website.url,
       categoryId: website.categoryId || null,
       customIcon: website.customIcon || '',
-      iconZoom: website.iconZoom || 1
+      iconZoom: website.iconZoom || 1,
+      iconBackgroundColor: website.iconBackgroundColor || 'transparent'
     }
   } else {
     resetForm()
@@ -43,7 +45,8 @@ function resetForm() {
     url: '',
     categoryId: null,
     customIcon: '',
-    iconZoom: 1
+    iconZoom: 1,
+    iconBackgroundColor: 'transparent'
   }
   errors.value = {
     name: '',
@@ -84,7 +87,8 @@ function handleSubmit() {
       url: normalizeUrl(formData.value.url),
       categoryId: formData.value.categoryId || null,
       customIcon: formData.value.customIcon || null,
-      iconZoom: formData.value.iconZoom
+      iconZoom: formData.value.iconZoom,
+      iconBackgroundColor: formData.value.iconBackgroundColor
     })
   } else {
     // Add new website
@@ -94,10 +98,11 @@ function handleSubmit() {
       formData.value.categoryId || null,
       websitesStore.currentPage
     )
-    // Update the zoom if different from default
-    if (formData.value.iconZoom !== 1) {
+    // Update the zoom and color if different from defaults
+    if (formData.value.iconZoom !== 1 || formData.value.iconBackgroundColor !== 'transparent') {
       websitesStore.updateWebsite(website.id, {
-        iconZoom: formData.value.iconZoom
+        iconZoom: formData.value.iconZoom,
+        iconBackgroundColor: formData.value.iconBackgroundColor
       })
     }
   }
@@ -196,10 +201,40 @@ function handleCancel() {
             </div>
           </div>
 
+          <div class="form-group">
+            <label for="icon-bg-color" class="form-label">
+              Icon Background Color
+            </label>
+            <div class="color-picker-container">
+              <input
+                id="icon-bg-color"
+                v-model="formData.iconBackgroundColor"
+                type="color"
+                class="color-input"
+              />
+              <input
+                v-model="formData.iconBackgroundColor"
+                type="text"
+                class="form-input color-text-input"
+                placeholder="transparent, #000000, rgb(255,0,0)"
+              />
+            </div>
+            <div class="color-presets">
+              <button type="button" class="color-preset" @click="formData.iconBackgroundColor = 'transparent'" style="background: linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%, #ccc), linear-gradient(45deg, #ccc 25%, white 25%, white 75%, #ccc 75%, #ccc); background-size: 10px 10px; background-position: 0 0, 5px 5px;">None</button>
+              <button type="button" class="color-preset" @click="formData.iconBackgroundColor = '#000000'" style="background: #000000; color: white;">Black</button>
+              <button type="button" class="color-preset" @click="formData.iconBackgroundColor = '#FFFFFF'" style="background: #FFFFFF; color: black; border: 1px solid #ddd;">White</button>
+              <button type="button" class="color-preset" @click="formData.iconBackgroundColor = '#FF6B6B'" style="background: #FF6B6B; color: white;">Red</button>
+              <button type="button" class="color-preset" @click="formData.iconBackgroundColor = '#4ECDC4'" style="background: #4ECDC4; color: white;">Teal</button>
+              <button type="button" class="color-preset" @click="formData.iconBackgroundColor = '#45B7D1'" style="background: #45B7D1; color: white;">Blue</button>
+              <button type="button" class="color-preset" @click="formData.iconBackgroundColor = '#FFA07A'" style="background: #FFA07A; color: white;">Orange</button>
+              <button type="button" class="color-preset" @click="formData.iconBackgroundColor = '#9B59B6'" style="background: #9B59B6; color: white;">Purple</button>
+            </div>
+          </div>
+
           <div v-if="formData.url || formData.customIcon" class="form-group">
             <label class="form-label">Icon Preview</label>
             <div class="icon-preview">
-              <div class="preview-icon">
+              <div class="preview-icon" :style="{ backgroundColor: formData.iconBackgroundColor }">
                 <img
                   :src="formData.customIcon || `https://www.google.com/s2/favicons?domain=${normalizeUrl(formData.url)}&sz=128`"
                   :style="{ transform: `scale(${formData.iconZoom})` }"
@@ -388,6 +423,61 @@ function handleCancel() {
   transform: scale(0.95);
 }
 
+.color-picker-container {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.color-input {
+  width: 60px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  padding: 4px;
+  background: white;
+}
+
+.color-input::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.color-input::-webkit-color-swatch {
+  border: none;
+  border-radius: 4px;
+}
+
+.color-text-input {
+  flex: 1;
+}
+
+.color-presets {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.color-preset {
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.color-preset:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.color-preset:active {
+  transform: scale(0.95);
+}
+
 .icon-preview {
   display: flex;
   justify-content: center;
@@ -492,6 +582,11 @@ function handleCancel() {
 
   .icon-preview {
     background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .color-input {
+    background: rgba(255, 255, 255, 0.05);
     border-color: rgba(255, 255, 255, 0.1);
   }
 }

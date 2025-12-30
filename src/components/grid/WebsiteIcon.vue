@@ -103,7 +103,7 @@ function handleImageError() {
       :aria-label="`Open ${website.name}`"
       :class="{ 'in-edit-mode': isEditMode }"
     >
-      <div class="icon-image">
+      <div class="icon-image" :style="{ backgroundColor: website.iconBackgroundColor || 'transparent' }">
         <img
           v-if="!imageError"
           :src="website.customIcon || website.favicon"

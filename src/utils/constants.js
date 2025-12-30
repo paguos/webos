@@ -68,6 +68,7 @@ export const DEFAULT_SETTINGS = {
     type: 'gradient',
     gradient: GRADIENT_PRESETS[0]
   },
+  wallpaperUrl: '',
   animations: true,
   showLabels: true,
   theme: 'auto'

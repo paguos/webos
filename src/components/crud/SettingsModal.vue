@@ -1,10 +1,30 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useWebsitesStore } from '../../stores/websitesStore'
 import { useUIStore } from '../../stores/uiStore'
 
 const websitesStore = useWebsitesStore()
 const uiStore = useUIStore()
+
+const wallpaperUrl = ref(websitesStore.settings.wallpaperUrl || '')
+
+// Watch for settings changes
+watch(() => websitesStore.settings.wallpaperUrl, (newValue) => {
+  wallpaperUrl.value = newValue || ''
+}, { immediate: true })
+
+function handleSaveWallpaper() {
+  websitesStore.updateSettings({
+    wallpaperUrl: wallpaperUrl.value
+  })
+}
+
+function handleClearWallpaper() {
+  wallpaperUrl.value = ''
+  websitesStore.updateSettings({
+    wallpaperUrl: ''
+  })
+}
 
 function handleExport() {
   const data = websitesStore.exportData()
@@ -67,6 +87,36 @@ function handleClose() {
               <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             </svg>
           </button>
+        </div>
+
+        <div class="settings-section">
+          <h3 class="section-title">Appearance</h3>
+          <div class="wallpaper-settings">
+            <div class="input-group">
+              <label for="wallpaper-url" class="input-label">Wallpaper URL</label>
+              <div class="input-with-buttons">
+                <input
+                  id="wallpaper-url"
+                  v-model="wallpaperUrl"
+                  type="text"
+                  class="wallpaper-input"
+                  placeholder="https://example.com/image.jpg"
+                />
+                <div class="inline-buttons">
+                  <button class="icon-button" @click="handleSaveWallpaper" title="Apply Wallpaper">
+                    <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                      <path d="M16.667 5L7.5 14.167 3.333 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                  <button class="icon-button danger" @click="handleClearWallpaper" title="Clear Wallpaper">
+                    <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                      <path d="M15 5L5 15M5 5l10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="settings-section">
@@ -200,7 +250,121 @@ function handleClose() {
   margin-bottom: 0;
 }
 
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.input-with-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.wallpaper-input {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.8);
+  color: rgba(0, 0, 0, 0.9);
+  font-size: 14px;
+  transition: all var(--transition-fast);
+}
+
+.wallpaper-input:focus {
+  outline: none;
+  border-color: rgba(0, 122, 255, 0.6);
+  background: rgba(255, 255, 255, 1);
+}
+
+.wallpaper-input::placeholder {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.inline-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.icon-button {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, 0.7);
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.icon-button:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: rgba(0, 0, 0, 0.9);
+  transform: scale(1.05);
+}
+
+.icon-button:active {
+  transform: scale(0.95);
+}
+
+.icon-button.danger {
+  color: #FF3B30;
+}
+
+.icon-button.danger:hover {
+  background: rgba(255, 59, 48, 0.1);
+  color: #FF3B30;
+}
+
 @media (prefers-color-scheme: dark) {
+  .input-label {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .wallpaper-input {
+    border-color: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .wallpaper-input:focus {
+    border-color: rgba(10, 132, 255, 0.6);
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .wallpaper-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  .icon-button {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .icon-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .icon-button.danger {
+    color: #FF453A;
+  }
+
+  .icon-button.danger:hover {
+    background: rgba(255, 69, 58, 0.15);
+    color: #FF453A;
+  }
+
   .modal-header {
     border-bottom-color: rgba(255, 255, 255, 0.1);
   }

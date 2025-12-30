@@ -122,6 +122,7 @@ export const useWebsitesStore = defineStore('websites', () => {
       categoryId,
       customIcon: null,
       iconZoom: 1,
+      iconBackgroundColor: 'transparent',
       position: { page, order },
       metadata: {
         createdAt: new Date().toISOString(),

@@ -7,7 +7,20 @@ import PaginationDots from './PaginationDots.vue'
 
 const websitesStore = useWebsitesStore()
 
-const gradientStyle = computed(() => {
+const backgroundStyle = computed(() => {
+  const wallpaperUrl = websitesStore.settings.wallpaperUrl
+
+  // If wallpaper is set, use it as background
+  if (wallpaperUrl && wallpaperUrl.trim()) {
+    return {
+      backgroundImage: `url(${wallpaperUrl})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat'
+    }
+  }
+
+  // Otherwise use gradient
   const gradient = websitesStore.settings.background.gradient
   const colors = gradient.colors.join(', ')
   return {
@@ -17,7 +30,7 @@ const gradientStyle = computed(() => {
 </script>
 
 <template>
-  <div class="launchpad-container" :style="gradientStyle">
+  <div class="launchpad-container" :style="backgroundStyle">
     <SearchBar />
     <WebsiteGrid />
     <PaginationDots v-if="websitesStore.totalPages > 1" />
