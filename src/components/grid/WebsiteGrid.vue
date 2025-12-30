@@ -97,7 +97,7 @@ onUnmounted(() => {
 
 <template>
   <div class="grid-container">
-    <!-- Edit Mode Button with Helper Text -->
+    <!-- Edit Mode Button -->
     <div v-if="hasResults && !isSearching" class="edit-mode-container">
       <button
         class="edit-mode-button glass"
@@ -106,12 +106,6 @@ onUnmounted(() => {
       >
         {{ uiStore.isEditMode ? 'Done' : 'Edit' }}
       </button>
-      <p v-if="!uiStore.isEditMode" class="helper-text">
-        Click "Edit" to rearrange icons
-      </p>
-      <p v-else class="helper-text active-mode">
-        ✓ Edit Mode Active - Drag icons to rearrange
-      </p>
     </div>
 
     <draggable
@@ -199,7 +193,7 @@ onUnmounted(() => {
 /* Edit Mode Container */
 .edit-mode-container {
   position: fixed;
-  top: 120px;
+  top: 40px;
   right: 32px;
   z-index: var(--z-dropdown);
   display: flex;
@@ -217,18 +211,15 @@ onUnmounted(() => {
   text-shadow: var(--text-shadow);
   transition: all var(--transition-base);
   box-shadow: var(--glass-shadow);
-  animation: pulse 2s ease-in-out infinite;
 }
 
 .edit-mode-button:hover {
   transform: scale(1.08);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
-  animation: none;
 }
 
 .edit-mode-button.active {
   background: rgba(255, 255, 255, 0.3);
-  animation: none;
 }
 
 .helper-text {
@@ -340,7 +331,7 @@ onUnmounted(() => {
   }
 
   .edit-mode-container {
-    top: 90px;
+    top: 30px;
     right: 20px;
   }
 
