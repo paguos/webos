@@ -120,7 +120,7 @@ function handleCancel() {
 <template>
   <Teleport to="body">
     <div v-if="uiStore.showWebsiteForm" class="overlay" @click="handleCancel">
-      <div class="modal website-form" @click.stop>
+      <div class="modal website-form modal-instant" @click.stop>
         <h2 class="form-title">{{ isEditing ? 'Edit Website' : 'Add Website' }}</h2>
 
         <form @submit.prevent="handleSubmit">
@@ -591,23 +591,71 @@ function handleCancel() {
   }
 }
 
+@media (max-width: 768px) {
+  .website-form {
+    min-width: 0;
+    width: 85vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 28px;
+  }
+
+  .zoom-presets {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .color-presets {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
 @media (max-width: 640px) {
   .website-form {
     min-width: 0;
     width: 90vw;
-    padding: 24px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 20px;
   }
 
   .form-title {
-    font-size: 24px;
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
   }
 
   .form-actions {
     flex-direction: column-reverse;
+    gap: 10px;
   }
 
   .form-button {
     width: 100%;
+  }
+
+  .zoom-presets {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .color-presets {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .color-picker-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .color-input {
+    width: 100%;
+  }
+
+  .preview-icon {
+    width: 80px;
+    height: 80px;
   }
 }
 </style>
