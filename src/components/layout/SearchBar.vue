@@ -74,8 +74,10 @@ function openSettings() {
         aria-label="Settings"
       >
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <path d="M10 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" stroke="currentColor" stroke-width="1.5"/>
-          <path d="M10 1v2m0 14v2M4.22 4.22l1.42 1.42m8.48 8.48l1.42 1.42M1 10h2m14 0h2M4.22 15.78l1.42-1.42m8.48-8.48l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <!-- iOS-style settings icon -->
+          <path d="M10 1.5v2m0 13v2M15.364 4.636l-1.414 1.414m-7.9 7.9l-1.414 1.414M18.5 10h-2m-13 0h-2M15.364 15.364l-1.414-1.414m-7.9-7.9L4.636 4.636" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.5" fill="currentColor" fill-opacity="0.15"/>
+          <circle cx="10" cy="10" r="1.5" fill="currentColor"/>
         </svg>
       </button>
     </div>

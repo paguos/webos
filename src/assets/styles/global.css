@@ -195,7 +195,7 @@ ul, ol {
   background: var(--modal-overlay-bg);
   backdrop-filter: blur(10px);
   z-index: var(--z-overlay);
-  animation: overlayFadeIn 0.2s ease-out;
+  animation: overlayFadeIn 0.15s ease-out;
 }
 
 /* Modal */
@@ -214,6 +214,11 @@ ul, ol {
   max-height: 90vh;
   overflow: auto;
   animation: scaleBounce 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Fast-appearing modal variant */
+.modal.modal-instant {
+  animation: fadeInScale 0.15s ease-out;
 }
 
 /* Badge */

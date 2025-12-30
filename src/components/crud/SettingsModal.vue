@@ -59,7 +59,7 @@ function handleClose() {
 <template>
   <Teleport to="body">
     <div v-if="uiStore.showSettingsModal" class="overlay" @click="handleClose">
-      <div class="modal settings-modal" @click.stop>
+      <div class="modal settings-modal modal-instant" @click.stop>
         <div class="modal-header">
           <h2 class="modal-title">Settings</h2>
           <button class="close-button" @click="handleClose" aria-label="Close">
