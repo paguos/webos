@@ -51,11 +51,11 @@ export const useWebsitesStore = defineStore('websites', () => {
   })
 
   // Actions
-  function initializeData() {
-    // Load from localStorage or use default data
-    const storedWebsites = storage.get(STORAGE_KEYS.WEBSITES)
-    const storedCategories = storage.get(STORAGE_KEYS.CATEGORIES)
-    const storedSettings = storage.get(STORAGE_KEYS.SETTINGS)
+  async function initializeData() {
+    // Load from storage or use default data
+    const storedWebsites = await storage.get(STORAGE_KEYS.WEBSITES)
+    const storedCategories = await storage.get(STORAGE_KEYS.CATEGORIES)
+    const storedSettings = await storage.get(STORAGE_KEYS.SETTINGS)
 
     if (storedWebsites && Array.isArray(storedWebsites)) {
       websites.value = storedWebsites
@@ -252,9 +252,9 @@ export const useWebsitesStore = defineStore('websites', () => {
     currentPage.value = page
   }
 
-  function updateSettings(newSettings) {
+  async function updateSettings(newSettings) {
     settings.value = { ...settings.value, ...newSettings }
-    storage.set(STORAGE_KEYS.SETTINGS, settings.value)
+    await storage.set(STORAGE_KEYS.SETTINGS, settings.value)
   }
 
   function exportData() {
@@ -267,7 +267,7 @@ export const useWebsitesStore = defineStore('websites', () => {
     }
   }
 
-  function importData(data) {
+  async function importData(data) {
     if (!data || !data.websites) {
       throw new Error('Invalid import data')
     }
@@ -276,9 +276,9 @@ export const useWebsitesStore = defineStore('websites', () => {
     categories.value = data.categories || []
     settings.value = data.settings || DEFAULT_SETTINGS
 
-    saveWebsites()
-    saveCategories()
-    storage.set(STORAGE_KEYS.SETTINGS, settings.value)
+    await saveWebsites()
+    await saveCategories()
+    await storage.set(STORAGE_KEYS.SETTINGS, settings.value)
   }
 
   function clearAllData() {
@@ -290,12 +290,12 @@ export const useWebsitesStore = defineStore('websites', () => {
     storage.clear()
   }
 
-  function saveWebsites() {
-    storage.set(STORAGE_KEYS.WEBSITES, websites.value)
+  async function saveWebsites() {
+    await storage.set(STORAGE_KEYS.WEBSITES, websites.value)
   }
 
-  function saveCategories() {
-    storage.set(STORAGE_KEYS.CATEGORIES, categories.value)
+  async function saveCategories() {
+    await storage.set(STORAGE_KEYS.CATEGORIES, categories.value)
   }
 
   return {

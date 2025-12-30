@@ -1,11 +1,14 @@
 {
   "name": "browseros",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",
+    "dev:electron": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
     "build": "vite build",
+    "build:electron": "vite build && electron-builder",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -16,7 +19,33 @@
     "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "@vitejs/plugin-vue": "^6.0.1",
-    "vite": "^7.2.4"
+    "concurrently": "^9.2.1",
+    "electron": "^39.2.7",
+    "electron-builder": "^26.0.12",
+    "png-to-ico": "^3.0.1",
+    "sharp": "^0.34.5",
+    "vite": "^7.2.4",
+    "vite-plugin-electron": "^0.29.0",
+    "wait-on": "^9.0.3"
+  },
+  "build": {
+    "appId": "com.browseros.app",
+    "productName": "BrowserOS",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity"
+    },
+    "win": {},
+    "linux": {
+      "category": "Utility"
+    }
   }
 }

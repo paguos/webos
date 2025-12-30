@@ -36,9 +36,17 @@ function handleClick(event) {
     return
   }
 
-  // Visit the website in default browser
+  // Track visit
   websitesStore.visitWebsite(props.website.id)
-  window.open(props.website.url, '_blank')
+
+  // Open in default browser (Electron) or new tab (web)
+  if (window.electronAPI?.shell?.openExternal) {
+    // Electron: Open in system default browser
+    window.electronAPI.shell.openExternal(props.website.url)
+  } else {
+    // Web: Open in new tab
+    window.open(props.website.url, '_blank')
+  }
 }
 
 function handleContextMenu(e) {

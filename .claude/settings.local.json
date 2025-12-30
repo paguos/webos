@@ -5,7 +5,18 @@
       "WebSearch",
       "Bash(npm run build:*)",
       "Bash(cat:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(timeout 10s npm run dev:electron:*)",
+      "Bash(lsof:*)",
+      "Bash(pkill:*)",
+      "Bash(node scripts/generate-icons.mjs:*)",
+      "Bash(for size in 16 32 128 256 512)",
+      "Bash(do)",
+      "Bash(sips:*)",
+      "Bash(done)",
+      "Bash(iconutil:*)",
+      "Bash(node scripts/generate-ico.mjs:*)",
+      "Bash(npm run build:electron:*)"
     ]
   }
 }

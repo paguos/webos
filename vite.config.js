@@ -1,12 +1,19 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import electron from 'vite-plugin-electron'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [
+    vue(),
+    electron({
+      entry: 'electron/main.cjs'
+    })
+  ],
+  base: './', // Use relative paths for Electron
   server: {
-    port: 3000,
-    open: true
+    port: 5173,
+    open: false // Don't open browser when running Electron
   },
   build: {
     outDir: 'dist',

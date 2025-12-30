@@ -1,12 +1,23 @@
+import electronStorage from './electronStorage'
+
 const STORAGE_PREFIX = 'browserOS_'
 const STORAGE_VERSION = '1.0'
 
-export const storage = {
-  /**
-   * Get an item from localStorage
-   * @param {string} key - The key to retrieve
-   * @returns {any} The parsed value or null if not found
-   */
+// Detect environment
+const isElectron = () => window.electronAPI?.isElectron
+
+// Initialize storage on load
+let initialized = false
+
+async function ensureInitialized() {
+  if (!initialized && isElectron()) {
+    await electronStorage.initialize()
+    initialized = true
+  }
+}
+
+// LocalStorage backend (browser)
+const localStorageBackend = {
   get(key) {
     try {
       const item = localStorage.getItem(STORAGE_PREFIX + key)
@@ -26,12 +37,6 @@ export const storage = {
     }
   },
 
-  /**
-   * Set an item in localStorage
-   * @param {string} key - The key to store
-   * @param {any} value - The value to store
-   * @returns {boolean} True if successful, false otherwise
-   */
   set(key, value) {
     try {
       const dataToStore = {
@@ -48,7 +53,6 @@ export const storage = {
     } catch (e) {
       if (e.name === 'QuotaExceededError') {
         console.error('localStorage quota exceeded')
-        // Could emit an event here for the UI to show an error
         alert('Storage is full. Please delete some websites or export your data.')
       } else {
         console.error(`Storage set error for key "${key}":`, e)
@@ -57,10 +61,6 @@ export const storage = {
     }
   },
 
-  /**
-   * Remove an item from localStorage
-   * @param {string} key - The key to remove
-   */
   remove(key) {
     try {
       localStorage.removeItem(STORAGE_PREFIX + key)
@@ -71,9 +71,6 @@ export const storage = {
     }
   },
 
-  /**
-   * Clear all browserOS data from localStorage
-   */
   clear() {
     try {
       const keys = Object.keys(localStorage)
@@ -89,10 +86,6 @@ export const storage = {
     }
   },
 
-  /**
-   * Get all browserOS keys from localStorage
-   * @returns {string[]} Array of keys without prefix
-   */
   keys() {
     try {
       const keys = Object.keys(localStorage)
@@ -103,13 +96,75 @@ export const storage = {
       console.error('Storage keys error:', e)
       return []
     }
+  }
+}
+
+// Use Electron storage if available, fallback to localStorage
+const storageBackend = isElectron() ? electronStorage : localStorageBackend
+
+export const storage = {
+  /**
+   * Get an item from storage
+   * @param {string} key - The key to retrieve
+   * @returns {Promise<any>} The parsed value or null if not found
+   */
+  async get(key) {
+    await ensureInitialized()
+    return storageBackend.get(key)
   },
 
   /**
-   * Check if storage is available and has space
+   * Set an item in storage
+   * @param {string} key - The key to store
+   * @param {any} value - The value to store
+   * @returns {Promise<boolean>} True if successful, false otherwise
+   */
+  async set(key, value) {
+    await ensureInitialized()
+    return storageBackend.set(key, value)
+  },
+
+  /**
+   * Remove an item from storage
+   * @param {string} key - The key to remove
+   * @returns {Promise<boolean>} True if successful
+   */
+  async remove(key) {
+    await ensureInitialized()
+    return storageBackend.remove(key)
+  },
+
+  /**
+   * Clear all browserOS data from storage
+   * @returns {Promise<boolean>} True if successful
+   */
+  async clear() {
+    await ensureInitialized()
+    return storageBackend.clear()
+  },
+
+  /**
+   * Get all browserOS keys from storage
+   * @returns {Promise<string[]>} Array of keys
+   */
+  async keys() {
+    await ensureInitialized()
+    return storageBackend.keys()
+  },
+
+  /**
+   * Check if storage is available (only for localStorage)
    * @returns {Object} Storage availability info
    */
   checkAvailability() {
+    if (isElectron()) {
+      return {
+        available: true,
+        type: 'electron-file-system',
+        unlimited: true
+      }
+    }
+
     try {
       const testKey = STORAGE_PREFIX + '__test__'
       localStorage.setItem(testKey, 'test')
@@ -117,20 +172,21 @@ export const storage = {
 
       // Try to estimate remaining space
       let used = 0
-      this.keys().forEach(key => {
-        const item = localStorage.getItem(STORAGE_PREFIX + key)
-        used += item ? item.length : 0
+      const keys = Object.keys(localStorage)
+      keys.forEach(key => {
+        if (key.startsWith(STORAGE_PREFIX)) {
+          const item = localStorage.getItem(key)
+          used += item ? item.length : 0
+        }
       })
 
-      // localStorage typically has ~5-10MB limit
-      const estimated = {
+      return {
         available: true,
+        type: 'localStorage',
         usedBytes: used,
         usedKB: (used / 1024).toFixed(2),
         usedMB: (used / 1024 / 1024).toFixed(2)
       }
-
-      return estimated
     } catch (e) {
       return {
         available: false,
