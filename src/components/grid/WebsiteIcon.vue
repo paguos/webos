@@ -84,7 +84,7 @@ function handleImageError() {
   >
     <!-- iOS-style delete button in edit mode -->
     <button
-      v-if="isEditMode"
+      v-show="isEditMode"
       class="delete-button"
       @click.stop="handleDelete"
       @mousedown.stop
