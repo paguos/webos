@@ -108,6 +108,7 @@ function handleImageError() {
           v-if="!imageError"
           :src="website.customIcon || website.favicon"
           :alt="website.name"
+          :style="{ transform: `scale(${website.iconZoom || 1})` }"
           @error="handleImageError"
         />
         <svg v-else width="48" height="48" viewBox="0 0 48 48" fill="none">
@@ -236,19 +237,19 @@ function handleImageError() {
 }
 
 .icon-image {
-  width: 64px;
-  height: 64px;
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
+  border-radius: var(--icon-border-radius);
   overflow: hidden;
 }
 
 .icon-image img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
 }
 
 .icon-image svg {
@@ -268,11 +269,6 @@ function handleImageError() {
 }
 
 @media (max-width: 640px) {
-  .icon-image {
-    width: 48px;
-    height: 48px;
-  }
-
   .icon-label {
     font-size: 11px;
   }

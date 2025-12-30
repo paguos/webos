@@ -11,7 +11,8 @@ const formData = ref({
   name: '',
   url: '',
   categoryId: null,
-  customIcon: ''
+  customIcon: '',
+  iconZoom: 1
 })
 
 const errors = ref({
@@ -28,7 +29,8 @@ watch(() => uiStore.editingWebsite, (website) => {
       name: website.name,
       url: website.url,
       categoryId: website.categoryId || null,
-      customIcon: website.customIcon || ''
+      customIcon: website.customIcon || '',
+      iconZoom: website.iconZoom || 1
     }
   } else {
     resetForm()
@@ -40,7 +42,8 @@ function resetForm() {
     name: '',
     url: '',
     categoryId: null,
-    customIcon: ''
+    customIcon: '',
+    iconZoom: 1
   }
   errors.value = {
     name: '',
@@ -80,16 +83,23 @@ function handleSubmit() {
       name: formData.value.name.trim(),
       url: normalizeUrl(formData.value.url),
       categoryId: formData.value.categoryId || null,
-      customIcon: formData.value.customIcon || null
+      customIcon: formData.value.customIcon || null,
+      iconZoom: formData.value.iconZoom
     })
   } else {
     // Add new website
-    websitesStore.addWebsite(
+    const website = websitesStore.addWebsite(
       formData.value.name.trim(),
       formData.value.url,
       formData.value.categoryId || null,
       websitesStore.currentPage
     )
+    // Update the zoom if different from default
+    if (formData.value.iconZoom !== 1) {
+      websitesStore.updateWebsite(website.id, {
+        iconZoom: formData.value.iconZoom
+      })
+    }
   }
 
   uiStore.closeWebsiteForm()
@@ -163,6 +173,40 @@ function handleCancel() {
               class="form-input"
               placeholder="e.g., https://example.com/icon.png"
             />
+          </div>
+
+          <div class="form-group">
+            <label for="icon-zoom" class="form-label">
+              Icon Zoom ({{ Math.round(formData.iconZoom * 100) }}%)
+            </label>
+            <input
+              id="icon-zoom"
+              v-model.number="formData.iconZoom"
+              type="range"
+              min="1"
+              max="2"
+              step="0.05"
+              class="form-slider"
+            />
+            <div class="zoom-controls">
+              <button type="button" class="zoom-preset" @click="formData.iconZoom = 1">100%</button>
+              <button type="button" class="zoom-preset" @click="formData.iconZoom = 1.25">125%</button>
+              <button type="button" class="zoom-preset" @click="formData.iconZoom = 1.5">150%</button>
+              <button type="button" class="zoom-preset" @click="formData.iconZoom = 2">200%</button>
+            </div>
+          </div>
+
+          <div v-if="formData.url || formData.customIcon" class="form-group">
+            <label class="form-label">Icon Preview</label>
+            <div class="icon-preview">
+              <div class="preview-icon">
+                <img
+                  :src="formData.customIcon || `https://www.google.com/s2/favicons?domain=${normalizeUrl(formData.url)}&sz=128`"
+                  :style="{ transform: `scale(${formData.iconZoom})` }"
+                  alt="Icon preview"
+                />
+              </div>
+            </div>
           </div>
 
           <div class="form-actions">
@@ -276,6 +320,106 @@ function handleCancel() {
   transform: scale(0.98);
 }
 
+.form-slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.1);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.form-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #007AFF;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.form-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.form-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #007AFF;
+  cursor: pointer;
+  border: none;
+  transition: all var(--transition-fast);
+}
+
+.form-slider::-moz-range-thumb:hover {
+  transform: scale(1.2);
+}
+
+.zoom-controls {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.zoom-preset {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  background: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, 0.7);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.zoom-preset:hover {
+  background: rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.zoom-preset:active {
+  transform: scale(0.95);
+}
+
+.icon-preview {
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 12px;
+  border: 1px dashed rgba(0, 0, 0, 0.1);
+}
+
+.preview-icon {
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px) saturate(180%);
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3),
+              0 1px 3px rgba(0, 0, 0, 0.1),
+              inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  overflow: hidden;
+}
+
+.preview-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.2s ease-out;
+}
+
 @media (prefers-color-scheme: dark) {
   .form-title {
     color: rgba(255, 255, 255, 0.9);
@@ -323,6 +467,32 @@ function handleCancel() {
 
   .form-button.secondary:hover {
     background: rgba(255, 255, 255, 0.1);
+  }
+
+  .form-slider {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .form-slider::-webkit-slider-thumb {
+    background: #0A84FF;
+  }
+
+  .form-slider::-moz-range-thumb {
+    background: #0A84FF;
+  }
+
+  .zoom-preset {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .zoom-preset:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .icon-preview {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.1);
   }
 }
 

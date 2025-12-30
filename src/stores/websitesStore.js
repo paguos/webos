@@ -121,6 +121,7 @@ export const useWebsitesStore = defineStore('websites', () => {
       favicon,
       categoryId,
       customIcon: null,
+      iconZoom: 1,
       position: { page, order },
       metadata: {
         createdAt: new Date().toISOString(),
