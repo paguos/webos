@@ -1,0 +1,342 @@
+/* Global styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: white;
+}
+
+#app {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* Scrollbar styling (WebKit) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Button reset */
+button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  outline: none;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Input reset */
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-size: inherit;
+  border: none;
+  outline: none;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Link reset */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Image */
+img {
+  display: block;
+  max-width: 100%;
+}
+
+/* List reset */
+ul, ol {
+  list-style: none;
+}
+
+/* Selection */
+::selection {
+  background: rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+/* Focus visible */
+:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 2px;
+}
+
+/* Utility classes */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Glass effect */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+}
+
+/* Card effect */
+.card {
+  background: var(--icon-bg);
+  backdrop-filter: blur(10px) saturate(180%);
+  border-radius: var(--icon-border-radius);
+  border: 1px solid var(--icon-border);
+  box-shadow: var(--icon-shadow);
+}
+
+/* Text shadow */
+.text-shadow {
+  text-shadow: var(--text-shadow);
+}
+
+/* Backdrop blur */
+.backdrop-blur {
+  backdrop-filter: blur(20px) saturate(180%);
+}
+
+/* Loading spinner */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Skeleton loader */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+/* Overlay */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--modal-overlay-bg);
+  backdrop-filter: blur(10px);
+  z-index: var(--z-overlay);
+  animation: overlayFadeIn 0.2s ease-out;
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--modal-bg);
+  backdrop-filter: blur(40px) saturate(180%);
+  border-radius: var(--modal-border-radius);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--modal-shadow);
+  z-index: calc(var(--z-overlay) + 1);
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+  animation: scaleBounce 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: white;
+  background: rgba(255, 59, 48, 0.9);
+  border-radius: 10px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Context menu */
+.context-menu {
+  position: fixed;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(40px) saturate(180%);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  padding: 8px;
+  min-width: 200px;
+  z-index: var(--z-dropdown);
+  animation: fadeIn 0.15s ease-out;
+}
+
+@media (prefers-color-scheme: dark) {
+  .context-menu {
+    background: rgba(50, 50, 50, 0.95);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.context-menu-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.9);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+@media (prefers-color-scheme: dark) {
+  .context-menu-item {
+    color: rgba(255, 255, 255, 0.9);
+  }
+}
+
+.context-menu-item:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+@media (prefers-color-scheme: dark) {
+  .context-menu-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.context-menu-item.danger {
+  color: #FF3B30;
+}
+
+.context-menu-divider {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.1);
+  margin: 4px 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .context-menu-divider {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* Toast notification */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  z-index: var(--z-tooltip);
+  animation: slideUp 0.3s ease-out;
+}
+
+/* No select */
+.no-select {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Draggable */
+.draggable {
+  cursor: move;
+  cursor: grab;
+}
+
+.draggable:active {
+  cursor: grabbing;
+}
+
+.ghost {
+  opacity: 0.5;
+  transform: scale(0.95);
+}
+
+.drag {
+  transform: scale(1.05);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  z-index: var(--z-modal);
+}

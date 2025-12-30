@@ -1,0 +1,128 @@
+:root {
+  /* Colors */
+  --primary-gradient-start: #667eea;
+  --primary-gradient-end: #764ba2;
+  --gradient-angle: 135deg;
+
+  /* Icon Card */
+  --icon-size: 100px;
+  --icon-gap: 30px;
+  --icon-border-radius: 22px;
+  --icon-bg: rgba(255, 255, 255, 0.15);
+  --icon-border: rgba(255, 255, 255, 0.2);
+  --icon-shadow: 0 10px 30px rgba(0, 0, 0, 0.3),
+                 0 1px 3px rgba(0, 0, 0, 0.1),
+                 inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  --icon-hover-shadow: 0 20px 40px rgba(0, 0, 0, 0.4),
+                       0 2px 6px rgba(0, 0, 0, 0.15);
+
+  /* Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.2);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.2),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.4);
+
+  /* Typography */
+  --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+                 "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+
+  /* Transitions */
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Z-index layers */
+  --z-base: 1;
+  --z-dropdown: 10;
+  --z-modal: 100;
+  --z-overlay: 1000;
+  --z-tooltip: 2000;
+
+  /* Grid */
+  --grid-columns: 7;
+  --grid-gap: var(--icon-gap);
+  --grid-padding: 40px;
+
+  /* Search bar */
+  --search-height: 52px;
+  --search-radius: 26px;
+  --search-width: 600px;
+
+  /* Pagination dots */
+  --dot-size: 8px;
+  --dot-gap: 8px;
+  --dot-active-width: 24px;
+  --dot-radius: 4px;
+
+  /* Modal */
+  --modal-bg: rgba(255, 255, 255, 0.95);
+  --modal-border-radius: 20px;
+  --modal-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  --modal-overlay-bg: rgba(0, 0, 0, 0.4);
+
+  /* Browser */
+  --browser-toolbar-height: 64px;
+  --browser-toolbar-bg: rgba(255, 255, 255, 0.8);
+  --browser-button-size: 36px;
+  --browser-button-bg: rgba(0, 0, 0, 0.05);
+  --browser-button-hover-bg: rgba(0, 0, 0, 0.1);
+
+  /* Colors for categories */
+  --color-red: #FF6B6B;
+  --color-teal: #4ECDC4;
+  --color-blue: #45B7D1;
+  --color-orange: #FFA07A;
+  --color-mint: #98D8C8;
+  --color-yellow: #F7DC6F;
+  --color-purple: #BB8FCE;
+  --color-sky: #85C1E2;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 1024px) {
+  :root {
+    --grid-columns: 5;
+    --icon-gap: 25px;
+    --search-width: 500px;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --grid-columns: 4;
+    --icon-size: 90px;
+    --icon-gap: 20px;
+    --grid-padding: 30px;
+    --search-width: 90vw;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --grid-columns: 3;
+    --icon-size: 80px;
+    --icon-gap: 20px;
+    --grid-padding: 20px;
+    --search-width: 90vw;
+    --search-height: 48px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --modal-bg: rgba(30, 30, 30, 0.95);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --browser-toolbar-bg: rgba(40, 40, 40, 0.9);
+  }
+}

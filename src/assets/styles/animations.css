@@ -1,0 +1,255 @@
+/* Fade in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Slide up animation */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Slide down animation */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Scale bounce animation */
+@keyframes scaleBounce {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Pulse animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Spin animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Shimmer animation for loading states */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+/* Slide left animation for page transitions */
+@keyframes slideLeft {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Slide right animation for page transitions */
+@keyframes slideRight {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Modal overlay fade */
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(10px);
+  }
+}
+
+/* Shake animation for errors */
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-10px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(10px);
+  }
+}
+
+/* iOS-style wiggle/jiggle animation */
+@keyframes wiggle {
+  0% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-2deg);
+  }
+  75% {
+    transform: rotate(2deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+/* iOS-style lift animation */
+@keyframes lift {
+  from {
+    transform: scale(1);
+    filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.3));
+  }
+  to {
+    transform: scale(1.1);
+    filter: drop-shadow(0 20px 50px rgba(0, 0, 0, 0.4));
+  }
+}
+
+/* Spring drop animation */
+@keyframes springDrop {
+  0% {
+    transform: scale(1.1);
+  }
+  40% {
+    transform: scale(1.15);
+  }
+  70% {
+    transform: scale(0.98);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Utility classes */
+.fade-in {
+  animation: fadeIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation-fill-mode: both;
+}
+
+.slide-up {
+  animation: slideUp 0.3s ease-out;
+  animation-fill-mode: both;
+}
+
+.slide-down {
+  animation: slideDown 0.3s ease-out;
+  animation-fill-mode: both;
+}
+
+.scale-bounce {
+  animation: scaleBounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+.shimmer {
+  background: linear-gradient(90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s linear infinite;
+}
+
+.shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+.wiggle {
+  animation: wiggle 0.5s ease-in-out infinite;
+  transform-origin: 50% 10%; /* Pivot from top center like iOS */
+}
+
+.lift {
+  animation: lift 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.spring-drop {
+  animation: springDrop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Stagger delays for grid items */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.3s; }
+.stagger-7 { animation-delay: 0.35s; }
+.stagger-8 { animation-delay: 0.4s; }
+.stagger-9 { animation-delay: 0.45s; }
+.stagger-10 { animation-delay: 0.5s; }
+
+/* Transition utilities */
+.transition-fast {
+  transition: all var(--transition-fast);
+}
+
+.transition-base {
+  transition: all var(--transition-base);
+}
+
+.transition-slow {
+  transition: all var(--transition-slow);
+}
+
+.transition-bounce {
+  transition: all var(--transition-bounce);
+}
