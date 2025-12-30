@@ -98,9 +98,10 @@ function handleSubmit() {
       formData.value.categoryId || null,
       websitesStore.currentPage
     )
-    // Update the zoom and color if different from defaults
-    if (formData.value.iconZoom !== 1 || formData.value.iconBackgroundColor !== 'transparent') {
+    // Update custom properties if different from defaults
+    if (formData.value.customIcon || formData.value.iconZoom !== 1 || formData.value.iconBackgroundColor !== 'transparent') {
       websitesStore.updateWebsite(website.id, {
+        customIcon: formData.value.customIcon || null,
         iconZoom: formData.value.iconZoom,
         iconBackgroundColor: formData.value.iconBackgroundColor
       })
