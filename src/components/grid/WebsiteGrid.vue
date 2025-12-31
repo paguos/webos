@@ -74,12 +74,9 @@ const filteredWebsites = computed(() => {
     )
   }
 
-  // Regular substring search by name or URL
+  // Regular substring search by name only
   return currentPageSites.filter(website => {
-    return (
-      website.name.toLowerCase().includes(query) ||
-      website.url.toLowerCase().includes(query)
-    )
+    return website.name.toLowerCase().includes(query)
   })
 })
 
