@@ -10,6 +10,7 @@ const searchInput = ref(null)
 // Tag suggestions state
 const showTagSuggestions = ref(false)
 const highlightedIndex = ref(-1)
+const positionUpdateTrigger = ref(0) // Used to trigger position recalculation
 
 // Detect if user is typing a tag query
 const isTagQuery = computed(() => {
@@ -82,8 +83,11 @@ const additionalSearchText = computed(() => {
   return remaining
 })
 
-// Position dropdown below search input
+// Position dropdown below search input (reactive to window resize/scroll)
 const suggestionsPosition = computed(() => {
+  // Depend on trigger to recalculate on resize/scroll
+  positionUpdateTrigger.value // eslint-disable-line no-unused-expressions
+
   if (!searchInput.value) return {}
 
   const rect = searchInput.value.getBoundingClientRect()
@@ -94,6 +98,11 @@ const suggestionsPosition = computed(() => {
     width: `${rect.width}px`
   }
 })
+
+// Update position when window resizes or scrolls
+function updateSuggestionsPosition() {
+  positionUpdateTrigger.value++
+}
 
 function handleInput(e) {
   const value = e.target.value
@@ -197,11 +206,15 @@ function handleClickOutside(event) {
 onMounted(() => {
   window.addEventListener('keydown', handleKeydownInSuggestions)
   document.addEventListener('click', handleClickOutside)
+  window.addEventListener('resize', updateSuggestionsPosition)
+  window.addEventListener('scroll', updateSuggestionsPosition, true) // Use capture for all scroll events
 })
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydownInSuggestions)
   document.removeEventListener('click', handleClickOutside)
+  window.removeEventListener('resize', updateSuggestionsPosition)
+  window.removeEventListener('scroll', updateSuggestionsPosition, true)
 })
 
 function openSettings() {
