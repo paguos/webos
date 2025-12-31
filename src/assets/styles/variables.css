@@ -47,6 +47,17 @@
   --transition-launchpad: var(--spring-response) var(--spring-damping-critical);
   --transition-icon-reflow: 350ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
+  /* Enhanced iOS-inspired spring physics */
+  --spring-bouncy: cubic-bezier(0.34, 1.56, 0.64, 1);        /* Strong overshoot */
+  --spring-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);     /* Smooth settling */
+  --spring-responsive: cubic-bezier(0.42, 0, 0.58, 1.2);     /* Quick with subtle bounce */
+  --spring-gentle: cubic-bezier(0.25, 1, 0.5, 1);            /* Soft landing */
+
+  /* Reflow animation settings */
+  --reflow-duration-base: 400ms;
+  --reflow-stagger-delay: 30ms;
+  --reflow-max-delay: 300ms;
+
   /* Z-index layers */
   --z-base: 1;
   --z-dropdown: 10;

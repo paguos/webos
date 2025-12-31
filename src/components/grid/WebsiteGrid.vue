@@ -217,11 +217,92 @@ onUnmounted(() => {
   max-width: 100%;
 }
 
-/* Enable smooth reflow for all grid items */
+/* Enable smooth reflow for all grid items with iOS-style spring physics */
 .website-grid > * {
-  transition: transform var(--transition-icon-reflow),
-              opacity var(--transition-fast);
-  will-change: transform;
+  transition: transform var(--reflow-duration-base) var(--spring-responsive),
+              opacity var(--transition-fast),
+              scale var(--reflow-duration-base) var(--spring-bouncy);
+  will-change: transform, scale;
+}
+
+/* Subtle pulse effect during reflow (respects prefers-reduced-motion) */
+@media (prefers-reduced-motion: no-preference) {
+  .website-grid > * {
+    animation: subtlePulse var(--reflow-duration-base) var(--spring-responsive);
+    animation-play-state: paused;
+  }
+
+  /* Trigger animation on reflow (when grid changes) */
+  .website-grid > *:hover {
+    animation-play-state: running;
+  }
+}
+
+@keyframes subtlePulse {
+  0% {
+    scale: 1;
+  }
+  30% {
+    scale: 1.02;
+  }
+  100% {
+    scale: 1;
+  }
+}
+
+/* Progressive stagger based on grid position for organic cascade effect */
+.website-grid > *:nth-child(1) { transition-delay: 0ms; }
+.website-grid > *:nth-child(2) { transition-delay: 30ms; }
+.website-grid > *:nth-child(3) { transition-delay: 60ms; }
+.website-grid > *:nth-child(4) { transition-delay: 90ms; }
+.website-grid > *:nth-child(5) { transition-delay: 120ms; }
+.website-grid > *:nth-child(6) { transition-delay: 150ms; }
+.website-grid > *:nth-child(7) { transition-delay: 180ms; }
+.website-grid > *:nth-child(8) { transition-delay: 210ms; }
+.website-grid > *:nth-child(9) { transition-delay: 240ms; }
+.website-grid > *:nth-child(10) { transition-delay: 270ms; }
+.website-grid > *:nth-child(11) { transition-delay: 300ms; }
+.website-grid > *:nth-child(12) { transition-delay: 330ms; }
+.website-grid > *:nth-child(13) { transition-delay: 360ms; }
+.website-grid > *:nth-child(14) { transition-delay: 390ms; }
+.website-grid > *:nth-child(15) { transition-delay: 420ms; }
+.website-grid > *:nth-child(16) { transition-delay: 450ms; }
+.website-grid > *:nth-child(17) { transition-delay: 480ms; }
+.website-grid > *:nth-child(18) { transition-delay: 510ms; }
+.website-grid > *:nth-child(19) { transition-delay: 540ms; }
+.website-grid > *:nth-child(20) { transition-delay: 570ms; }
+
+/* Cap stagger delay for items beyond 20 */
+.website-grid > *:nth-child(n+21) {
+  transition-delay: 600ms;
+}
+
+/* Responsive spring intensity - adjust based on viewport size */
+/* Desktop: More columns changing (7→5) = stronger spring effect */
+@media (min-width: 1025px) {
+  .website-grid > * {
+    transition: transform var(--reflow-duration-base) var(--spring-responsive),
+                opacity var(--transition-fast),
+                scale var(--reflow-duration-base) var(--spring-bouncy);
+  }
+}
+
+/* Tablet: Medium spring for moderate column changes (5→4) */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .website-grid > * {
+    transition: transform calc(var(--reflow-duration-base) * 0.9) var(--spring-smooth),
+                opacity var(--transition-fast),
+                scale calc(var(--reflow-duration-base) * 0.9) var(--spring-bouncy);
+  }
+}
+
+/* Mobile: Gentle spring for small column changes (4→3) */
+@media (max-width: 768px) {
+  .website-grid > * {
+    transition: transform calc(var(--reflow-duration-base) * 0.8) var(--spring-gentle),
+                opacity var(--transition-fast),
+                scale calc(var(--reflow-duration-base) * 0.8) var(--spring-smooth);
+  }
 }
 
 /* iOS-style Draggable states */
