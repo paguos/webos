@@ -86,13 +86,7 @@ function openSettings() {
 
 <style scoped>
 .search-bar-container {
-  position: fixed;
-  top: 40px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: var(--z-dropdown);
-  width: var(--search-width);
-  max-width: 90vw;
+  width: 100%;
 }
 
 .search-bar {
@@ -104,6 +98,7 @@ function openSettings() {
   border-radius: var(--search-radius);
   box-shadow: var(--glass-shadow);
   transition: all var(--transition-base);
+  flex-wrap: nowrap;
 }
 
 .search-bar:focus-within {
@@ -117,7 +112,8 @@ function openSettings() {
 }
 
 .search-input {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
   background: transparent;
   color: white;
   font-size: 16px;
@@ -155,10 +151,6 @@ function openSettings() {
 }
 
 @media (max-width: 640px) {
-  .search-bar-container {
-    top: 20px;
-  }
-
   .search-bar {
     padding: 0 16px;
     gap: 8px;

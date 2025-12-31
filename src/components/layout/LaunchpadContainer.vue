@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useWebsitesStore } from '../../stores/websitesStore'
-import SearchBar from './SearchBar.vue'
+import Navigation from './Navigation.vue'
 import WebsiteGrid from '../grid/WebsiteGrid.vue'
 import PaginationDots from './PaginationDots.vue'
 
@@ -31,7 +31,7 @@ const backgroundStyle = computed(() => {
 
 <template>
   <div class="launchpad-container" :style="backgroundStyle">
-    <SearchBar />
+    <Navigation />
     <WebsiteGrid />
     <PaginationDots v-if="websitesStore.totalPages > 1" />
   </div>

@@ -61,10 +61,6 @@ const filteredWebsites = computed(() => {
 const hasResults = computed(() => filteredWebsites.value.length > 0)
 const isSearching = computed(() => uiStore.searchQuery.length > 0)
 
-function handleAddWebsite() {
-  uiStore.openWebsiteForm()
-}
-
 function triggerHaptic(style = 'medium') {
   if ('vibrate' in navigator) {
     const patterns = {
@@ -97,30 +93,6 @@ onUnmounted(() => {
 
 <template>
   <div class="grid-container">
-    <!-- Edit Mode Buttons -->
-    <div v-if="hasResults && !isSearching" class="edit-mode-container">
-      <!-- Add Website Button (only visible in edit mode) -->
-      <button
-        v-show="uiStore.isEditMode"
-        class="add-icon-button glass"
-        @click="handleAddWebsite"
-        aria-label="Add Website"
-      >
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-        </svg>
-      </button>
-
-      <!-- Edit/Done Button -->
-      <button
-        class="edit-mode-button glass"
-        :class="{ active: uiStore.isEditMode }"
-        @click="uiStore.toggleEditMode"
-      >
-        {{ uiStore.isEditMode ? 'Done' : 'Edit' }}
-      </button>
-    </div>
-
     <draggable
       v-if="hasResults"
       v-model="localWebsites"
@@ -202,87 +174,6 @@ onUnmounted(() => {
   transition: transform var(--transition-icon-reflow),
               opacity var(--transition-fast);
   will-change: transform;
-}
-
-/* Edit Mode Container */
-.edit-mode-container {
-  position: fixed;
-  top: 40px;
-  right: 32px;
-  z-index: var(--z-dropdown);
-  display: flex;
-  align-items: center;
-  gap: 0;
-}
-
-.edit-mode-button {
-  padding: 10px 24px;
-  border-radius: 20px;
-  font-size: 15px;
-  font-weight: 600;
-  color: white;
-  text-shadow: var(--text-shadow);
-  transition: all var(--transition-base);
-  box-shadow: var(--glass-shadow);
-}
-
-.edit-mode-button:hover {
-  transform: scale(1.08);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
-}
-
-.edit-mode-button.active {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-/* Add Website Button in Edit Mode */
-.add-icon-button {
-  padding: 10px;
-  font-size: 15px;
-  font-weight: 600;
-  color: white;
-  border-radius: 50%;
-  text-shadow: var(--text-shadow);
-  transition: all var(--transition-base);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  margin-right: 12px;
-  opacity: 0;
-  transform: scale(0.8);
-  animation: fadeInScale 0.2s ease-out forwards;
-  animation-delay: 0.1s;
-}
-
-.add-icon-button:hover {
-  transform: scale(1.08);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
-}
-
-.add-icon-button:active {
-  transform: scale(0.95);
-}
-
-@keyframes fadeInScale {
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.helper-text {
-  font-size: 13px;
-  font-weight: 500;
-  color: white;
-  text-shadow: var(--text-shadow);
-  background: rgba(0, 0, 0, 0.3);
-  padding: 6px 12px;
-  border-radius: 12px;
-  white-space: nowrap;
-  animation: fadeIn 0.3s ease-out;
 }
 
 /* iOS-style Draggable states */
@@ -379,28 +270,6 @@ onUnmounted(() => {
   .grid-container {
     padding-top: 110px;
     padding-bottom: 70px;
-  }
-
-  .edit-mode-container {
-    top: 30px;
-    right: 20px;
-  }
-
-  .edit-mode-button {
-    padding: 8px 18px;
-    font-size: 14px;
-  }
-
-  .add-icon-button {
-    width: 36px;
-    height: 36px;
-    padding: 8px;
-    margin-right: 8px;
-  }
-
-  .helper-text {
-    font-size: 12px;
-    padding: 5px 10px;
   }
 
   .empty-title {
