@@ -179,11 +179,12 @@ onUnmounted(() => {
   flex: 1;
   width: 100%;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   padding: var(--grid-padding);
-  padding-top: 120px;
+  padding-top: 140px;
   padding-bottom: 100px;
+  overflow-x: hidden;
   overflow-y: auto;
 }
 
@@ -369,14 +370,14 @@ onUnmounted(() => {
 
 @media (max-width: 1024px) {
   .grid-container {
-    padding-top: 100px;
+    padding-top: 140px;
     padding-bottom: 80px;
   }
 }
 
 @media (max-width: 640px) {
   .grid-container {
-    padding-top: 90px;
+    padding-top: 110px;
     padding-bottom: 70px;
   }
 
