@@ -49,7 +49,32 @@ const filteredWebsites = computed(() => {
     return currentPageSites
   }
 
-  // Filter by name or URL
+  // Check if this is a tag query
+  if (query.startsWith('tag:')) {
+    const tagName = query.slice(4).trim()
+
+    if (!tagName) {
+      // Just "tag:" typed - show all websites
+      return currentPageSites
+    }
+
+    // Find the tag by name (case-insensitive exact match)
+    const matchingTag = websitesStore.tags.find(
+      tag => tag.name.toLowerCase() === tagName
+    )
+
+    if (!matchingTag) {
+      // Tag doesn't exist - show no results
+      return []
+    }
+
+    // Filter websites that have this tag
+    return currentPageSites.filter(website =>
+      website.tagIds && website.tagIds.includes(matchingTag.id)
+    )
+  }
+
+  // Regular substring search by name or URL
   return currentPageSites.filter(website => {
     return (
       website.name.toLowerCase().includes(query) ||
