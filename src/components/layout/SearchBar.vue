@@ -45,13 +45,41 @@ const filteredTagSuggestions = computed(() => {
 const selectedTag = computed(() => {
   if (!isTagQuery.value) return null
 
-  const tagName = tagFilterText.value
-  if (!tagName) return null
+  const afterTag = tagFilterText.value
+  if (!afterTag) return null
 
-  // Find exact match (case-insensitive)
-  return websitesStore.tags.find(
-    tag => tag.name.toLowerCase() === tagName
-  )
+  // Try to find the longest matching tag at the start of the text
+  // This handles both "tag:work github" and "tag:workgithub"
+  let matchedTag = null
+  let maxLength = 0
+
+  for (const tag of websitesStore.tags) {
+    const tagNameLower = tag.name.toLowerCase()
+    const afterTagLower = afterTag.toLowerCase()
+
+    // Check if the text starts with this tag name
+    if (afterTagLower.startsWith(tagNameLower)) {
+      // Keep the longest match
+      if (tagNameLower.length > maxLength) {
+        matchedTag = tag
+        maxLength = tagNameLower.length
+      }
+    }
+  }
+
+  return matchedTag
+})
+
+// Get additional search text after the tag
+const additionalSearchText = computed(() => {
+  if (!selectedTag.value) return ''
+
+  const afterTag = tagFilterText.value
+  const tagNameLength = selectedTag.value.name.length
+
+  // Return everything after the matched tag name
+  const remaining = afterTag.slice(tagNameLength).trim()
+  return remaining
 })
 
 // Position dropdown below search input
@@ -112,8 +140,9 @@ function handleKeydownInSuggestions(e) {
     return
   }
 
-  // Handle backspace/delete when a tag is selected - remove entire tag
-  if ((e.key === 'Backspace' || e.key === 'Delete') && selectedTag.value) {
+  // Handle backspace/delete when only a tag is selected (no additional text)
+  // If there's additional text, allow normal character deletion
+  if ((e.key === 'Backspace' || e.key === 'Delete') && selectedTag.value && !additionalSearchText.value) {
     e.preventDefault()
     clearSearch()
     return
@@ -208,6 +237,9 @@ function openSettings() {
             }"
           >
             {{ selectedTag.name }}
+          </span>
+          <span v-if="additionalSearchText" class="additional-search-text">
+            {{ additionalSearchText }}
           </span>
         </div>
       </div>
@@ -348,6 +380,14 @@ function openSettings() {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(10px);
   pointer-events: auto;
+}
+
+.additional-search-text {
+  color: white;
+  font-size: 16px;
+  font-weight: 400;
+  margin-left: 4px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .clear-button,

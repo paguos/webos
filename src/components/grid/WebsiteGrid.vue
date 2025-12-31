@@ -51,17 +51,31 @@ const filteredWebsites = computed(() => {
 
   // Check if this is a tag query
   if (query.startsWith('tag:')) {
-    const tagName = query.slice(4).trim()
+    const afterTag = query.slice(4).trim()
 
-    if (!tagName) {
+    if (!afterTag) {
       // Just "tag:" typed - show all websites
       return currentPageSites
     }
 
-    // Find the tag by name (case-insensitive exact match)
-    const matchingTag = websitesStore.tags.find(
-      tag => tag.name.toLowerCase() === tagName
-    )
+    // Try to find the longest matching tag at the start of the text
+    // This handles both "tag:work github" and "tag:workgithub"
+    let matchingTag = null
+    let maxLength = 0
+
+    for (const tag of websitesStore.tags) {
+      const tagNameLower = tag.name.toLowerCase()
+      const afterTagLower = afterTag.toLowerCase()
+
+      // Check if the text starts with this tag name
+      if (afterTagLower.startsWith(tagNameLower)) {
+        // Keep the longest match
+        if (tagNameLower.length > maxLength) {
+          matchingTag = tag
+          maxLength = tagNameLower.length
+        }
+      }
+    }
 
     if (!matchingTag) {
       // Tag doesn't exist - show no results
@@ -69,9 +83,21 @@ const filteredWebsites = computed(() => {
     }
 
     // Filter websites that have this tag
-    return currentPageSites.filter(website =>
+    let results = currentPageSites.filter(website =>
       website.tagIds && website.tagIds.includes(matchingTag.id)
     )
+
+    // Get additional search text after the matched tag name
+    const additionalSearch = afterTag.slice(maxLength).trim()
+
+    // If there's additional search text, filter by website name
+    if (additionalSearch) {
+      results = results.filter(website =>
+        website.name.toLowerCase().includes(additionalSearch.toLowerCase())
+      )
+    }
+
+    return results
   }
 
   // Regular substring search by name only
