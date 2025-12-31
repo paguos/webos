@@ -8,10 +8,10 @@ export const useUIStore = defineStore('ui', () => {
   const showWebsiteForm = ref(false)
   const showSettingsModal = ref(false)
   const showFolderModal = ref(false)
-  const showCategoryManager = ref(false)
+  const showTagManager = ref(false)
   const showConfirmDialog = ref(false)
   const editingWebsite = ref(null)
-  const editingCategory = ref(null)
+  const editingTag = ref(null)
   const activeFolderId = ref(null)
   const confirmDialogConfig = ref({
     title: '',
@@ -58,14 +58,14 @@ export const useUIStore = defineStore('ui', () => {
     activeFolderId.value = null
   }
 
-  function openCategoryManager(category = null) {
-    editingCategory.value = category
-    showCategoryManager.value = true
+  function openTagManager(tag = null) {
+    editingTag.value = tag
+    showTagManager.value = true
   }
 
-  function closeCategoryManager() {
-    showCategoryManager.value = false
-    editingCategory.value = null
+  function closeTagManager() {
+    showTagManager.value = false
+    editingTag.value = null
   }
 
   function openConfirmDialog(config) {
@@ -116,10 +116,10 @@ export const useUIStore = defineStore('ui', () => {
     showWebsiteForm,
     showSettingsModal,
     showFolderModal,
-    showCategoryManager,
+    showTagManager,
     showConfirmDialog,
     editingWebsite,
-    editingCategory,
+    editingTag,
     activeFolderId,
     confirmDialogConfig,
 
@@ -135,8 +135,8 @@ export const useUIStore = defineStore('ui', () => {
     closeSettingsModal,
     openFolderModal,
     closeFolderModal,
-    openCategoryManager,
-    closeCategoryManager,
+    openTagManager,
+    closeTagManager,
     openConfirmDialog,
     closeConfirmDialog,
     confirmDialogAction

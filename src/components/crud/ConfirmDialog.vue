@@ -14,7 +14,7 @@ function handleCancel() {
 
 <template>
   <Teleport to="body">
-    <div v-if="uiStore.showConfirmDialog" class="overlay" @click="handleCancel">
+    <div v-if="uiStore.showConfirmDialog" class="overlay confirm-dialog-overlay" @click="handleCancel">
       <div class="modal confirm-dialog modal-instant" @click.stop>
         <h2 class="dialog-title">{{ uiStore.confirmDialogConfig.title }}</h2>
         <p class="dialog-message">{{ uiStore.confirmDialogConfig.message }}</p>
@@ -32,10 +32,15 @@ function handleCancel() {
 </template>
 
 <style scoped>
+.confirm-dialog-overlay {
+  z-index: 3000;
+}
+
 .confirm-dialog {
   min-width: 400px;
   max-width: 500px;
   padding: 32px;
+  z-index: 3001;
 }
 
 .dialog-title {

@@ -5,6 +5,7 @@ import LaunchpadContainer from './components/layout/LaunchpadContainer.vue'
 import WebsiteForm from './components/crud/WebsiteForm.vue'
 import ConfirmDialog from './components/crud/ConfirmDialog.vue'
 import SettingsModal from './components/crud/SettingsModal.vue'
+import TagManager from './components/crud/TagManager.vue'
 
 const websitesStore = useWebsitesStore()
 const isLoading = ref(true)
@@ -52,6 +53,7 @@ onMounted(async () => {
       <WebsiteForm />
       <ConfirmDialog />
       <SettingsModal />
+      <TagManager />
     </template>
   </div>
 </template>

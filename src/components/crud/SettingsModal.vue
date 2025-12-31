@@ -74,6 +74,10 @@ function handleClearAll() {
 function handleClose() {
   uiStore.closeSettingsModal()
 }
+
+function handleManageTags() {
+  uiStore.openTagManager()
+}
 </script>
 
 <template>
@@ -116,6 +120,19 @@ function handleClose() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h3 class="section-title">Organization</h3>
+          <div class="settings-actions">
+            <button class="settings-button" @click="handleManageTags">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M17.5 10.833l-6.667 6.667H2.5V9.167L9.167 2.5a1.667 1.667 0 012.357 0l5.976 5.976a1.667 1.667 0 010 2.357z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12.5 5.833L14.167 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Manage Tags
+            </button>
           </div>
         </div>
 
