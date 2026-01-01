@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
-import storage from '../utils/storage'
-import { STORAGE_KEYS, DEFAULT_SETTINGS } from '../utils/constants'
-import { getFaviconUrl } from '../utils/favicon'
-import { normalizeUrl } from '../utils/validators'
+import storage from '../utils/storage.ts'
+import { STORAGE_KEYS, DEFAULT_SETTINGS } from '../utils/constants.ts'
+import { getFaviconUrl } from '../utils/favicon.ts'
+import { normalizeUrl } from '../utils/validators.ts'
 
 export const useWebsitesStore = defineStore('websites', () => {
   // State

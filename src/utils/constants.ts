@@ -1,13 +1,22 @@
 // App constants
 
-export const STORAGE_KEYS = {
+import type {
+  StorageKeys,
+  GridSizeConfig,
+  GradientPreset,
+  Settings,
+  FaviconServices,
+  GridSizeOption
+} from '../types'
+
+export const STORAGE_KEYS: StorageKeys = {
   WEBSITES: 'websites',
   TAGS: 'tags',
   SETTINGS: 'settings',
   LAYOUT: 'layout'
 }
 
-export const GRID_SIZES = {
+export const GRID_SIZES: Record<GridSizeOption, GridSizeConfig> = {
   small: {
     iconSize: 80,
     gap: 20,
@@ -28,7 +37,7 @@ export const GRID_SIZES = {
   }
 }
 
-export const GRADIENT_PRESETS = [
+export const GRADIENT_PRESETS: readonly GradientPreset[] = [
   {
     name: 'Big Sur',
     colors: ['#667eea', '#764ba2'],
@@ -59,9 +68,9 @@ export const GRADIENT_PRESETS = [
     colors: ['#FF512F', '#F09819'],
     angle: 135
   }
-]
+] as const
 
-export const DEFAULT_SETTINGS = {
+export const DEFAULT_SETTINGS: Settings = {
   gridSize: 'medium',
   iconsPerPage: 35,
   background: {
@@ -74,16 +83,16 @@ export const DEFAULT_SETTINGS = {
   theme: 'auto'
 }
 
-export const TAG_COLORS = [
+export const TAG_COLORS: readonly string[] = [
   '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A',
   '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2',
   '#F8B739', '#52B788', '#E76F51', '#2A9D8F'
-]
+] as const
 
 export const DEFAULT_ICON_URL = '/default-icon.svg'
 
-export const FAVICON_SERVICES = {
-  google: (domain) => `https://www.google.com/s2/favicons?domain=${domain}&sz=128`,
-  duckduckgo: (domain) => `https://icons.duckduckgo.com/ip3/${domain}.ico`,
-  direct: (origin) => `${origin}/favicon.ico`
+export const FAVICON_SERVICES: FaviconServices = {
+  google: (domain: string) => `https://www.google.com/s2/favicons?domain=${domain}&sz=128`,
+  duckduckgo: (domain: string) => `https://icons.duckduckgo.com/ip3/${domain}.ico`,
+  direct: (origin: string) => `${origin}/favicon.ico`
 }

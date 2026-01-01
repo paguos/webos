@@ -3,10 +3,10 @@ import { getDomain, getOrigin } from './validators'
 
 /**
  * Fetch favicon for a given URL with fallback chain
- * @param {string} url - The website URL
- * @returns {Promise<string>} URL to the favicon
+ * @param url - The website URL
+ * @returns URL to the favicon
  */
-export async function fetchFavicon(url) {
+export async function fetchFavicon(url: string | null | undefined): Promise<string> {
   if (!url) return DEFAULT_ICON_URL
 
   const domain = getDomain(url)
@@ -43,10 +43,10 @@ export async function fetchFavicon(url) {
 
 /**
  * Get favicon URL (synchronous version, just constructs the URL)
- * @param {string} url - The website URL
- * @returns {string} URL to the favicon
+ * @param url - The website URL
+ * @returns URL to the favicon
  */
-export function getFaviconUrl(url) {
+export function getFaviconUrl(url: string | null | undefined): string {
   if (!url) return DEFAULT_ICON_URL
 
   const domain = getDomain(url)
@@ -58,10 +58,10 @@ export function getFaviconUrl(url) {
 
 /**
  * Preload favicon image
- * @param {string} faviconUrl - The favicon URL to preload
- * @returns {Promise<string>} Resolves with URL if loaded, rejects if failed
+ * @param faviconUrl - The favicon URL to preload
+ * @returns Resolves with URL if loaded, rejects if failed
  */
-export function preloadFavicon(faviconUrl) {
+export function preloadFavicon(faviconUrl: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image()
 

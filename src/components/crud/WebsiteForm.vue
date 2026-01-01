@@ -2,7 +2,7 @@
 import { ref, watch, computed, nextTick, onMounted, onUnmounted } from 'vue'
 import { useWebsitesStore } from '../../stores/websitesStore'
 import { useUIStore } from '../../stores/uiStore'
-import { isValidUrl, isValidName, normalizeUrl } from '../../utils/validators'
+import { isValidUrl, isValidName, normalizeUrl } from '../../utils/validators.ts'
 import { v4 as uuidv4 } from 'uuid'
 
 const websitesStore = useWebsitesStore()

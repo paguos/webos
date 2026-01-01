@@ -1,15 +1,36 @@
+import type { StorageData } from '../types'
 import electronStorage from './electronStorage'
 
 const STORAGE_PREFIX = 'webOS_'
 const STORAGE_VERSION = '1.0'
 
+// Storage backend interface
+interface StorageBackend {
+  get<T = any>(key: string): T | null
+  set<T = any>(key: string, value: T): boolean
+  remove(key: string): boolean
+  clear(): boolean
+  keys(): string[]
+}
+
+// Storage availability info
+interface StorageAvailability {
+  available: boolean
+  type?: string
+  unlimited?: boolean
+  usedBytes?: number
+  usedKB?: string
+  usedMB?: string
+  error?: string
+}
+
 // Detect environment
-const isElectron = () => window.electronAPI?.isElectron
+const isElectron = (): boolean => !!(window as any).electronAPI?.isElectron
 
 // Initialize storage on load
 let initialized = false
 
-async function ensureInitialized() {
+async function ensureInitialized(): Promise<void> {
   if (!initialized && isElectron()) {
     await electronStorage.initialize()
     initialized = true
@@ -17,29 +38,29 @@ async function ensureInitialized() {
 }
 
 // LocalStorage backend (browser)
-const localStorageBackend = {
-  get(key) {
+const localStorageBackend: StorageBackend = {
+  get<T = any>(key: string): T | null {
     try {
       const item = localStorage.getItem(STORAGE_PREFIX + key)
       if (!item) return null
 
-      const parsed = JSON.parse(item)
+      const parsed: StorageData<T> = JSON.parse(item)
 
       // Check version for potential migrations
       if (parsed.version && parsed.version !== STORAGE_VERSION) {
         console.warn(`Storage version mismatch for key: ${key}`)
       }
 
-      return parsed.data !== undefined ? parsed.data : parsed
+      return parsed.data !== undefined ? parsed.data : (parsed as any)
     } catch (e) {
       console.error(`Storage get error for key "${key}":`, e)
       return null
     }
   },
 
-  set(key, value) {
+  set<T = any>(key: string, value: T): boolean {
     try {
-      const dataToStore = {
+      const dataToStore: StorageData<T> = {
         version: STORAGE_VERSION,
         data: value,
         timestamp: new Date().toISOString()
@@ -50,7 +71,7 @@ const localStorageBackend = {
         JSON.stringify(dataToStore)
       )
       return true
-    } catch (e) {
+    } catch (e: any) {
       if (e.name === 'QuotaExceededError') {
         console.error('localStorage quota exceeded')
         alert('Storage is full. Please delete some websites or export your data.')
@@ -61,7 +82,7 @@ const localStorageBackend = {
     }
   },
 
-  remove(key) {
+  remove(key: string): boolean {
     try {
       localStorage.removeItem(STORAGE_PREFIX + key)
       return true
@@ -71,7 +92,7 @@ const localStorageBackend = {
     }
   },
 
-  clear() {
+  clear(): boolean {
     try {
       const keys = Object.keys(localStorage)
       keys.forEach(key => {
@@ -86,7 +107,7 @@ const localStorageBackend = {
     }
   },
 
-  keys() {
+  keys(): string[] {
     try {
       const keys = Object.keys(localStorage)
       return keys
@@ -100,63 +121,63 @@ const localStorageBackend = {
 }
 
 // Use Electron storage if available, fallback to localStorage
-const storageBackend = isElectron() ? electronStorage : localStorageBackend
+const storageBackend: StorageBackend = isElectron() ? electronStorage : localStorageBackend
 
 export const storage = {
   /**
    * Get an item from storage
-   * @param {string} key - The key to retrieve
-   * @returns {Promise<any>} The parsed value or null if not found
+   * @param key - The key to retrieve
+   * @returns The parsed value or null if not found
    */
-  async get(key) {
+  async get<T = any>(key: string): Promise<T | null> {
     await ensureInitialized()
-    return storageBackend.get(key)
+    return storageBackend.get<T>(key)
   },
 
   /**
    * Set an item in storage
-   * @param {string} key - The key to store
-   * @param {any} value - The value to store
-   * @returns {Promise<boolean>} True if successful, false otherwise
+   * @param key - The key to store
+   * @param value - The value to store
+   * @returns True if successful, false otherwise
    */
-  async set(key, value) {
+  async set<T = any>(key: string, value: T): Promise<boolean> {
     await ensureInitialized()
-    return storageBackend.set(key, value)
+    return storageBackend.set<T>(key, value)
   },
 
   /**
    * Remove an item from storage
-   * @param {string} key - The key to remove
-   * @returns {Promise<boolean>} True if successful
+   * @param key - The key to remove
+   * @returns True if successful
    */
-  async remove(key) {
+  async remove(key: string): Promise<boolean> {
     await ensureInitialized()
     return storageBackend.remove(key)
   },
 
   /**
    * Clear all webOS data from storage
-   * @returns {Promise<boolean>} True if successful
+   * @returns True if successful
    */
-  async clear() {
+  async clear(): Promise<boolean> {
     await ensureInitialized()
     return storageBackend.clear()
   },
 
   /**
    * Get all webOS keys from storage
-   * @returns {Promise<string[]>} Array of keys
+   * @returns Array of keys
    */
-  async keys() {
+  async keys(): Promise<string[]> {
     await ensureInitialized()
     return storageBackend.keys()
   },
 
   /**
    * Check if storage is available (only for localStorage)
-   * @returns {Object} Storage availability info
+   * @returns Storage availability info
    */
-  checkAvailability() {
+  checkAvailability(): StorageAvailability {
     if (isElectron()) {
       return {
         available: true,
@@ -187,7 +208,7 @@ export const storage = {
         usedKB: (used / 1024).toFixed(2),
         usedMB: (used / 1024 / 1024).toFixed(2)
       }
-    } catch (e) {
+    } catch (e: any) {
       return {
         available: false,
         error: e.message

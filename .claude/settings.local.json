@@ -16,7 +16,13 @@
       "Bash(done)",
       "Bash(iconutil:*)",
       "Bash(node scripts/generate-ico.mjs:*)",
-      "Bash(npm run build:electron:*)"
+      "Bash(npm run build:electron:*)",
+      "Bash(tree:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(wc:*)",
+      "Bash(npm run test:run:*)",
+      "Bash(npm run test:coverage:*)"
     ]
   }
 }
