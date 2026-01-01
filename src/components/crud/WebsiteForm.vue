@@ -411,7 +411,7 @@ onUnmounted(() => {
 
           <!-- Extra Links Section -->
           <div class="form-group">
-            <label class="form-label">Extra Links (Optional)</label>
+            <label class="form-label">Extra Links</label>
             <p class="form-hint">Add quick access links (e.g., Documentation, Issues)</p>
 
             <!-- Existing links list -->
