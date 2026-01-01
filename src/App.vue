@@ -30,7 +30,7 @@ onMounted(async () => {
     <div v-if="isLoading" class="loading-screen">
       <div class="loading-content">
         <div class="loading-spinner"></div>
-        <p>Loading BrowserOS...</p>
+        <p>Loading webOS...</p>
       </div>
     </div>
 

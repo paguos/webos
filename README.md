@@ -1,8 +1,8 @@
-# BrowserOS
+# webOS
 
 A beautiful macOS Launchpad-inspired bookmark manager that opens websites in your default browser.
 
-![BrowserOS](https://img.shields.io/badge/Vue-3.5-4FC08D?style=flat&logo=vue.js&logoColor=white)
+![webOS](https://img.shields.io/badge/Vue-3.5-4FC08D?style=flat&logo=vue.js&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-7.3-646CFF?style=flat&logo=vite&logoColor=white)
 ![Pinia](https://img.shields.io/badge/Pinia-3.0-FFD859?style=flat&logo=pinia&logoColor=black)
 
@@ -90,7 +90,7 @@ npm run preview
 ## Project Structure
 
 ```
-browserOS/
+webOS/
 ├── src/
 │   ├── components/
 │   │   ├── layout/          # Launchpad, SearchBar, Pagination

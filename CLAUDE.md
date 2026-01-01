@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-BrowserOS is a macOS Launchpad-inspired bookmark manager built with Vue 3. It's a single-page application that stores all data locally in the browser's localStorage and opens websites in the default browser. The UI features glassmorphism effects, smooth animations, drag-and-drop reordering, and macOS Big Sur-style gradient backgrounds.
+webOS is a macOS Launchpad-inspired bookmark manager built with Vue 3. It's a single-page application that stores all data locally in the browser's localStorage and opens websites in the default browser. The UI features glassmorphism effects, smooth animations, drag-and-drop reordering, and macOS Big Sur-style gradient backgrounds.
 
 ## Development Commands
 
@@ -46,7 +46,7 @@ The application uses two main Pinia stores:
 
 **Storage Layer** (`src/utils/storage.js`)
 - Wraps localStorage with versioning and error handling
-- All keys prefixed with `browserOS_` (defined by STORAGE_PREFIX)
+- All keys prefixed with `webOS_` (defined by STORAGE_PREFIX)
 - Data structure: `{ version, data, timestamp }`
 - Storage keys defined in `STORAGE_KEYS`: 'websites', 'categories', 'settings', 'layout'
 - Automatic quota exceeded handling with user alerts

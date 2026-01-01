@@ -32,7 +32,7 @@ function handleExport() {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `browserOS-export-${new Date().toISOString().split('T')[0]}.json`
+  a.download = `webOS-export-${new Date().toISOString().split('T')[0]}.json`
   a.click()
   URL.revokeObjectURL(url)
 }
@@ -162,7 +162,7 @@ function handleManageTags() {
 
         <div class="settings-section">
           <h3 class="section-title">About</h3>
-          <p class="about-text">BrowserOS - A macOS Launchpad-inspired web browser</p>
+          <p class="about-text">webOS - A macOS Launchpad-inspired web browser</p>
           <p class="about-text">Version 1.0.0</p>
         </div>
       </div>

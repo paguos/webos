@@ -2,9 +2,9 @@ const { app, BrowserWindow, ipcMain, shell } = require('electron')
 const path = require('path')
 const fs = require('fs').promises
 
-// App data directory - use custom path ~/.browserOS/
+// App data directory - use custom path ~/.webOS/
 const homeDir = app.getPath('home')
-const dataDir = path.join(homeDir, '.browserOS')
+const dataDir = path.join(homeDir, '.webOS')
 const dataFilePath = path.join(dataDir, 'data.json')
 
 let mainWindow = null

@@ -1,6 +1,6 @@
 import electronStorage from './electronStorage'
 
-const STORAGE_PREFIX = 'browserOS_'
+const STORAGE_PREFIX = 'webOS_'
 const STORAGE_VERSION = '1.0'
 
 // Detect environment
@@ -135,7 +135,7 @@ export const storage = {
   },
 
   /**
-   * Clear all browserOS data from storage
+   * Clear all webOS data from storage
    * @returns {Promise<boolean>} True if successful
    */
   async clear() {
@@ -144,7 +144,7 @@ export const storage = {
   },
 
   /**
-   * Get all browserOS keys from storage
+   * Get all webOS keys from storage
    * @returns {Promise<string[]>} Array of keys
    */
   async keys() {

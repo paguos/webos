@@ -1,5 +1,5 @@
 {
-  "name": "browseros",
+  "name": "webos",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -31,8 +31,8 @@
     "wait-on": "^9.0.3"
   },
   "build": {
-    "appId": "com.browseros.app",
-    "productName": "BrowserOS",
+    "appId": "com.webos.app",
+    "productName": "webOS",
     "directories": {
       "output": "release"
     },
