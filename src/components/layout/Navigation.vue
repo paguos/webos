@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
-import { useWebsitesStore } from '../../stores/websitesStore'
-import { useUIStore } from '../../stores/uiStore'
+import { useWebsitesStore } from '../../stores/websitesStore.ts'
+import { useUIStore } from '../../stores/uiStore.ts'
 import SearchBar from './SearchBar.vue'
 
 const websitesStore = useWebsitesStore()

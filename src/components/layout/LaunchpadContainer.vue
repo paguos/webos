@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { useWebsitesStore } from '../../stores/websitesStore'
+import { useWebsitesStore } from '../../stores/websitesStore.ts'
 import Navigation from './Navigation.vue'
 import WebsiteGrid from '../grid/WebsiteGrid.vue'
 import PaginationDots from './PaginationDots.vue'

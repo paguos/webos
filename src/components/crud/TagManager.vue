@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
-import { useWebsitesStore } from '../../stores/websitesStore'
-import { useUIStore } from '../../stores/uiStore'
+import { useWebsitesStore } from '../../stores/websitesStore.ts'
+import { useUIStore } from '../../stores/uiStore.ts'
 import { TAG_COLORS } from '../../utils/constants.ts'
 
 const websitesStore = useWebsitesStore()

@@ -1,7 +1,7 @@
 <script setup>
 import { ref, watch, computed, nextTick, onMounted, onUnmounted } from 'vue'
-import { useWebsitesStore } from '../../stores/websitesStore'
-import { useUIStore } from '../../stores/uiStore'
+import { useWebsitesStore } from '../../stores/websitesStore.ts'
+import { useUIStore } from '../../stores/uiStore.ts'
 import { isValidUrl, isValidName, normalizeUrl } from '../../utils/validators.ts'
 import { v4 as uuidv4 } from 'uuid'
 

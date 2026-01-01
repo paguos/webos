@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { useWebsitesStore } from '../../stores/websitesStore'
+import { useWebsitesStore } from '../../stores/websitesStore.ts'
 
 const websitesStore = useWebsitesStore()
 

@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useWebsitesStore } from './stores/websitesStore'
+import { useWebsitesStore } from './stores/websitesStore.ts'
 import LaunchpadContainer from './components/layout/LaunchpadContainer.vue'
 import WebsiteForm from './components/crud/WebsiteForm.vue'
 import ConfirmDialog from './components/crud/ConfirmDialog.vue'

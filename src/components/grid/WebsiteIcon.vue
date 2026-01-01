@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { useWebsitesStore } from '../../stores/websitesStore'
-import { useUIStore } from '../../stores/uiStore'
+import { useWebsitesStore } from '../../stores/websitesStore.ts'
+import { useUIStore } from '../../stores/uiStore.ts'
 import { useLongPress } from '../../composables/useLongPress'
 
 const props = defineProps({

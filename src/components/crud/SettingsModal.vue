@@ -1,7 +1,7 @@
 <script setup>
 import { ref, watch } from 'vue'
-import { useWebsitesStore } from '../../stores/websitesStore'
-import { useUIStore } from '../../stores/uiStore'
+import { useWebsitesStore } from '../../stores/websitesStore.ts'
+import { useUIStore } from '../../stores/uiStore.ts'
 
 const websitesStore = useWebsitesStore()
 const uiStore = useUIStore()

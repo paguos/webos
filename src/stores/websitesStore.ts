@@ -1,20 +1,29 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import type { Ref, ComputedRef } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
 import storage from '../utils/storage.ts'
 import { STORAGE_KEYS, DEFAULT_SETTINGS } from '../utils/constants.ts'
 import { getFaviconUrl } from '../utils/favicon.ts'
 import { normalizeUrl } from '../utils/validators.ts'
+import type { Website, Tag, Settings, TagWithCount, ExportData } from '../types'
+import type { WebsitesByPage } from './types'
+
+interface PositionUpdate {
+  id: string
+  page: number
+  order: number
+}
 
 export const useWebsitesStore = defineStore('websites', () => {
   // State
-  const websites = ref([])
-  const tags = ref([])
-  const settings = ref(DEFAULT_SETTINGS)
-  const currentPage = ref(0)
+  const websites: Ref<Website[]> = ref([])
+  const tags: Ref<Tag[]> = ref([])
+  const settings: Ref<Settings> = ref(DEFAULT_SETTINGS)
+  const currentPage: Ref<number> = ref(0)
 
   // Computed
-  const sortedWebsites = computed(() => {
+  const sortedWebsites: ComputedRef<Website[]> = computed(() => {
     return [...websites.value].sort((a, b) => {
       if (a.position.page !== b.position.page) {
         return a.position.page - b.position.page
@@ -23,8 +32,8 @@ export const useWebsitesStore = defineStore('websites', () => {
     })
   })
 
-  const websitesByPage = computed(() => {
-    const pages = {}
+  const websitesByPage: ComputedRef<WebsitesByPage> = computed(() => {
+    const pages: WebsitesByPage = {}
     sortedWebsites.value.forEach(website => {
       const page = website.position.page
       if (!pages[page]) {
@@ -35,15 +44,15 @@ export const useWebsitesStore = defineStore('websites', () => {
     return pages
   })
 
-  const currentPageWebsites = computed(() => {
+  const currentPageWebsites: ComputedRef<Website[]> = computed(() => {
     return websitesByPage.value[currentPage.value] || []
   })
 
-  const totalPages = computed(() => {
+  const totalPages: ComputedRef<number> = computed(() => {
     return Math.max(...sortedWebsites.value.map(w => w.position.page), 0) + 1
   })
 
-  const tagsWithCount = computed(() => {
+  const tagsWithCount: ComputedRef<TagWithCount[]> = computed(() => {
     return tags.value.map(tag => ({
       ...tag,
       count: websites.value.filter(w => w.tagIds && w.tagIds.includes(tag.id)).length
@@ -51,11 +60,11 @@ export const useWebsitesStore = defineStore('websites', () => {
   })
 
   // Actions
-  async function initializeData() {
+  async function initializeData(): Promise<void> {
     // Load from storage or use default data
-    const storedWebsites = await storage.get(STORAGE_KEYS.WEBSITES)
-    const storedTags = await storage.get(STORAGE_KEYS.TAGS)
-    const storedSettings = await storage.get(STORAGE_KEYS.SETTINGS)
+    const storedWebsites = await storage.get<Website[]>(STORAGE_KEYS.WEBSITES)
+    const storedTags = await storage.get<Tag[]>(STORAGE_KEYS.TAGS)
+    const storedSettings = await storage.get<Settings>(STORAGE_KEYS.SETTINGS)
 
     if (storedWebsites && Array.isArray(storedWebsites)) {
       websites.value = storedWebsites
@@ -75,7 +84,7 @@ export const useWebsitesStore = defineStore('websites', () => {
     }
   }
 
-  function loadSampleData() {
+  function loadSampleData(): void {
     const sampleWebsites = [
       { name: 'Google', url: 'https://google.com', tagIds: [], page: 0, order: 0 },
       { name: 'GitHub', url: 'https://github.com', tagIds: [], page: 0, order: 1 },
@@ -92,7 +101,7 @@ export const useWebsitesStore = defineStore('websites', () => {
     })
   }
 
-  function loadSampleTags() {
+  function loadSampleTags(): void {
     const sampleTags = [
       { name: 'Work', color: '#667eea' },
       { name: 'Personal', color: '#FF6B6B' },
@@ -106,7 +115,13 @@ export const useWebsitesStore = defineStore('websites', () => {
     })
   }
 
-  function addWebsite(name, url, tagIds = [], page = 0, order = null) {
+  function addWebsite(
+    name: string,
+    url: string,
+    tagIds: string[] = [],
+    page: number = 0,
+    order: number | null = null
+  ): Website {
     const normalizedUrl = normalizeUrl(url)
     const favicon = getFaviconUrl(normalizedUrl)
 
@@ -116,7 +131,7 @@ export const useWebsitesStore = defineStore('websites', () => {
       order = pageWebsites.length
     }
 
-    const website = {
+    const website: Website = {
       id: uuidv4(),
       name: name.trim(),
       url: normalizedUrl,
@@ -140,7 +155,7 @@ export const useWebsitesStore = defineStore('websites', () => {
     return website
   }
 
-  function updateWebsite(id, updates) {
+  function updateWebsite(id: string, updates: Partial<Website>): boolean {
     const index = websites.value.findIndex(w => w.id === id)
     if (index === -1) return false
 
@@ -178,7 +193,7 @@ export const useWebsitesStore = defineStore('websites', () => {
     return true
   }
 
-  function deleteWebsite(id) {
+  function deleteWebsite(id: string): boolean {
     const index = websites.value.findIndex(w => w.id === id)
     if (index === -1) return false
 
@@ -187,7 +202,7 @@ export const useWebsitesStore = defineStore('websites', () => {
     return true
   }
 
-  function visitWebsite(id) {
+  function visitWebsite(id: string): void {
     const website = websites.value.find(w => w.id === id)
     if (!website) return
 
@@ -196,8 +211,8 @@ export const useWebsitesStore = defineStore('websites', () => {
     saveWebsites()
   }
 
-  function addTag(name, color) {
-    const tag = {
+  function addTag(name: string, color: string): Tag {
+    const tag: Tag = {
       id: uuidv4(),
       name: name.trim(),
       color,
@@ -212,7 +227,7 @@ export const useWebsitesStore = defineStore('websites', () => {
     return tag
   }
 
-  function updateTag(id, updates) {
+  function updateTag(id: string, updates: Partial<Tag>): boolean {
     const index = tags.value.findIndex(t => t.id === id)
     if (index === -1) return false
 
@@ -229,7 +244,7 @@ export const useWebsitesStore = defineStore('websites', () => {
     return true
   }
 
-  function deleteTag(id) {
+  function deleteTag(id: string): boolean {
     const index = tags.value.findIndex(t => t.id === id)
     if (index === -1) return false
 
@@ -246,11 +261,11 @@ export const useWebsitesStore = defineStore('websites', () => {
     return true
   }
 
-  async function saveTags() {
+  async function saveTags(): Promise<void> {
     await storage.set(STORAGE_KEYS.TAGS, tags.value)
   }
 
-  function updateWebsitePositions(newPositions) {
+  function updateWebsitePositions(newPositions: PositionUpdate[]): void {
     // newPositions is an array of { id, page, order }
     newPositions.forEach(pos => {
       const website = websites.value.find(w => w.id === pos.id)
@@ -261,26 +276,26 @@ export const useWebsitesStore = defineStore('websites', () => {
     saveWebsites()
   }
 
-  function setCurrentPage(page) {
+  function setCurrentPage(page: number): void {
     currentPage.value = page
   }
 
-  async function updateSettings(newSettings) {
+  async function updateSettings(newSettings: Partial<Settings>): Promise<void> {
     settings.value = { ...settings.value, ...newSettings }
     await storage.set(STORAGE_KEYS.SETTINGS, settings.value)
   }
 
-  function exportData() {
+  function exportData(): ExportData {
     return {
       websites: websites.value,
       tags: tags.value,
       settings: settings.value,
       version: '1.0',
-      exportedAt: new Date().toISOString()
+      timestamp: new Date().toISOString()
     }
   }
 
-  async function importData(data) {
+  async function importData(data: ExportData): Promise<void> {
     if (!data || !data.websites) {
       throw new Error('Invalid import data')
     }
@@ -294,7 +309,7 @@ export const useWebsitesStore = defineStore('websites', () => {
     await storage.set(STORAGE_KEYS.SETTINGS, settings.value)
   }
 
-  function clearAllData() {
+  function clearAllData(): void {
     websites.value = []
     tags.value = []
     settings.value = DEFAULT_SETTINGS
@@ -303,7 +318,7 @@ export const useWebsitesStore = defineStore('websites', () => {
     storage.clear()
   }
 
-  async function saveWebsites() {
+  async function saveWebsites(): Promise<void> {
     await storage.set(STORAGE_KEYS.WEBSITES, websites.value)
   }
 

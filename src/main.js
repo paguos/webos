@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import { pinia } from './stores'
+import { pinia } from './stores/index.ts'
 import App from './App.vue'
 import './assets/styles/variables.css'
 import './assets/styles/animations.css'
