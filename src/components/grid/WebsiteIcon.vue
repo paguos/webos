@@ -27,6 +27,16 @@ const hasExtraLinks = computed(() => {
   return props.website.extraLinks && props.website.extraLinks.length > 0
 })
 
+// Sort extra links alphabetically by name
+const sortedExtraLinks = computed(() => {
+  if (!props.website.extraLinks || props.website.extraLinks.length === 0) {
+    return []
+  }
+  return [...props.website.extraLinks].sort((a, b) => {
+    return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+  })
+})
+
 // Long press to enter edit mode (iOS-style)
 const longPressHandlers = useLongPress(() => {
   if (!uiStore.isEditMode) {
@@ -168,7 +178,7 @@ function handleImageError() {
         <template v-if="hasExtraLinks">
           <div class="context-menu-divider"></div>
           <button
-            v-for="link in website.extraLinks"
+            v-for="link in sortedExtraLinks"
             :key="link.id"
             class="context-menu-item"
             @click="handleExtraLinkClick(link)"
