@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useWebsitesStore } from '../../stores/websitesStore'
 import { useUIStore } from '../../stores/uiStore'
 import { useLongPress } from '../../composables/useLongPress'
@@ -21,6 +21,11 @@ const uiStore = useUIStore()
 const showContextMenu = ref(false)
 const contextMenuPosition = ref({ x: 0, y: 0 })
 const imageError = ref(false)
+
+// Check if website has extra links
+const hasExtraLinks = computed(() => {
+  return props.website.extraLinks && props.website.extraLinks.length > 0
+})
 
 // Long press to enter edit mode (iOS-style)
 const longPressHandlers = useLongPress(() => {
@@ -46,6 +51,18 @@ function handleClick(event) {
   } else {
     // Web: Open in new tab
     window.open(props.website.url, '_blank')
+  }
+}
+
+function handleExtraLinkClick(extraLink) {
+  // Track visit for the main website
+  websitesStore.visitWebsite(props.website.id)
+
+  // Open extra link in default browser (Electron) or new tab (web)
+  if (window.electronAPI?.shell?.openExternal) {
+    window.electronAPI.shell.openExternal(extraLink.url)
+  } else {
+    window.open(extraLink.url, '_blank')
   }
 }
 
@@ -146,6 +163,24 @@ function handleImageError() {
           </svg>
           Open
         </button>
+
+        <!-- Extra links section -->
+        <template v-if="hasExtraLinks">
+          <div class="context-menu-divider"></div>
+          <button
+            v-for="link in website.extraLinks"
+            :key="link.id"
+            class="context-menu-item"
+            @click="handleExtraLinkClick(link)"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="margin-right: 8px;">
+              <path d="M6.5 9.5l3-3M7.5 4.5h1c1.66 0 3 1.34 3 3v1M4.5 8.5h-1c-1.66 0-3-1.34-3-3v-1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            {{ link.name }}
+          </button>
+          <div class="context-menu-divider"></div>
+        </template>
+
         <button class="context-menu-item" @click="handleEdit">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="margin-right: 8px;">
             <path d="M11.333 2L14 4.667l-9.333 9.333H2v-2.667L11.333 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>

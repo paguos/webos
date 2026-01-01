@@ -125,6 +125,7 @@ export const useWebsitesStore = defineStore('websites', () => {
       customIcon: null,
       iconZoom: 1,
       iconBackgroundColor: 'transparent',
+      extraLinks: [],
       position: { page, order },
       metadata: {
         createdAt: new Date().toISOString(),
@@ -152,6 +153,16 @@ export const useWebsitesStore = defineStore('websites', () => {
     // Ensure tagIds is an array if provided
     if (updates.tagIds !== undefined) {
       updates.tagIds = Array.isArray(updates.tagIds) ? updates.tagIds : []
+    }
+
+    // Ensure extraLinks is an array and normalize URLs
+    if (updates.extraLinks !== undefined) {
+      updates.extraLinks = Array.isArray(updates.extraLinks) ? updates.extraLinks : []
+      // Normalize URLs in extra links
+      updates.extraLinks = updates.extraLinks.map(link => ({
+        ...link,
+        url: normalizeUrl(link.url)
+      }))
     }
 
     websites.value[index] = {

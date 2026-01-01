@@ -247,6 +247,8 @@ ul, ol {
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
   padding: 8px;
   min-width: 200px;
+  max-height: 80vh;
+  overflow-y: auto;
   z-index: var(--z-dropdown);
   animation: fadeIn 0.15s ease-out;
 }

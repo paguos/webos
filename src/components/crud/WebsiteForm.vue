@@ -3,6 +3,7 @@ import { ref, watch, computed, nextTick, onMounted, onUnmounted } from 'vue'
 import { useWebsitesStore } from '../../stores/websitesStore'
 import { useUIStore } from '../../stores/uiStore'
 import { isValidUrl, isValidName, normalizeUrl } from '../../utils/validators'
+import { v4 as uuidv4 } from 'uuid'
 
 const websitesStore = useWebsitesStore()
 const uiStore = useUIStore()
@@ -13,7 +14,8 @@ const formData = ref({
   tagIds: [],
   customIcon: '',
   iconZoom: 1,
-  iconBackgroundColor: 'transparent'
+  iconBackgroundColor: 'transparent',
+  extraLinks: []
 })
 
 const errors = ref({
@@ -24,6 +26,12 @@ const errors = ref({
 const showTagsDropdown = ref(false)
 const tagSearchQuery = ref('')
 const tagSearchInput = ref(null)
+
+// Extra links state
+const editingLinkIndex = ref(null)
+const linkFormData = ref({ name: '', url: '' })
+const showLinkForm = ref(false)
+const linkErrors = ref({ name: '', url: '' })
 
 const isEditing = computed(() => !!uiStore.editingWebsite)
 
@@ -46,7 +54,8 @@ watch(() => uiStore.editingWebsite, (website) => {
       tagIds: website.tagIds || [],
       customIcon: website.customIcon || '',
       iconZoom: website.iconZoom || 1,
-      iconBackgroundColor: website.iconBackgroundColor || 'transparent'
+      iconBackgroundColor: website.iconBackgroundColor || 'transparent',
+      extraLinks: website.extraLinks || []
     }
   } else {
     resetForm()
@@ -60,7 +69,8 @@ function resetForm() {
     tagIds: [],
     customIcon: '',
     iconZoom: 1,
-    iconBackgroundColor: 'transparent'
+    iconBackgroundColor: 'transparent',
+    extraLinks: []
   }
   errors.value = {
     name: '',
@@ -102,7 +112,8 @@ function handleSubmit() {
       tagIds: formData.value.tagIds || [],
       customIcon: formData.value.customIcon || null,
       iconZoom: formData.value.iconZoom,
-      iconBackgroundColor: formData.value.iconBackgroundColor
+      iconBackgroundColor: formData.value.iconBackgroundColor,
+      extraLinks: formData.value.extraLinks || []
     })
   } else {
     // Add new website
@@ -113,11 +124,12 @@ function handleSubmit() {
       websitesStore.currentPage
     )
     // Update custom properties if different from defaults
-    if (formData.value.customIcon || formData.value.iconZoom !== 1 || formData.value.iconBackgroundColor !== 'transparent') {
+    if (formData.value.customIcon || formData.value.iconZoom !== 1 || formData.value.iconBackgroundColor !== 'transparent' || formData.value.extraLinks.length > 0) {
       websitesStore.updateWebsite(website.id, {
         customIcon: formData.value.customIcon || null,
         iconZoom: formData.value.iconZoom,
-        iconBackgroundColor: formData.value.iconBackgroundColor
+        iconBackgroundColor: formData.value.iconBackgroundColor,
+        extraLinks: formData.value.extraLinks || []
       })
     }
   }
@@ -171,6 +183,86 @@ function handleClickOutside(event) {
 function handleCancel() {
   uiStore.closeWebsiteForm()
   resetForm()
+}
+
+// Extra links management functions
+function openAddLinkForm() {
+  linkFormData.value = { name: '', url: '' }
+  editingLinkIndex.value = null
+  showLinkForm.value = true
+  linkErrors.value = { name: '', url: '' }
+}
+
+function openEditLinkForm(index) {
+  const link = formData.value.extraLinks[index]
+  linkFormData.value = { name: link.name, url: link.url }
+  editingLinkIndex.value = index
+  showLinkForm.value = true
+  linkErrors.value = { name: '', url: '' }
+}
+
+function cancelLinkForm() {
+  linkFormData.value = { name: '', url: '' }
+  editingLinkIndex.value = null
+  showLinkForm.value = false
+  linkErrors.value = { name: '', url: '' }
+}
+
+function validateLink() {
+  linkErrors.value = { name: '', url: '' }
+  let isValid = true
+
+  if (!linkFormData.value.name.trim() || linkFormData.value.name.trim().length > 30) {
+    linkErrors.value.name = 'Name is required (max 30 characters)'
+    isValid = false
+  }
+
+  if (!isValidUrl(normalizeUrl(linkFormData.value.url))) {
+    linkErrors.value.url = 'Please enter a valid URL'
+    isValid = false
+  }
+
+  // Check for duplicate names
+  const duplicateIndex = formData.value.extraLinks.findIndex(
+    (link, idx) => link.name.toLowerCase() === linkFormData.value.name.trim().toLowerCase()
+      && idx !== editingLinkIndex.value
+  )
+  if (duplicateIndex !== -1) {
+    linkErrors.value.name = 'A link with this name already exists'
+    isValid = false
+  }
+
+  // Check maximum limit
+  if (editingLinkIndex.value === null && formData.value.extraLinks.length >= 10) {
+    linkErrors.value.name = 'Maximum 10 extra links allowed'
+    isValid = false
+  }
+
+  return isValid
+}
+
+function saveLinkForm() {
+  if (!validateLink()) return
+
+  const link = {
+    id: editingLinkIndex.value !== null
+      ? formData.value.extraLinks[editingLinkIndex.value].id
+      : uuidv4(),
+    name: linkFormData.value.name.trim(),
+    url: normalizeUrl(linkFormData.value.url)
+  }
+
+  if (editingLinkIndex.value !== null) {
+    formData.value.extraLinks[editingLinkIndex.value] = link
+  } else {
+    formData.value.extraLinks.push(link)
+  }
+
+  cancelLinkForm()
+}
+
+function removeLink(index) {
+  formData.value.extraLinks.splice(index, 1)
 }
 
 onMounted(() => {
@@ -314,6 +406,88 @@ onUnmounted(() => {
                   ×
                 </button>
               </span>
+            </div>
+          </div>
+
+          <!-- Extra Links Section -->
+          <div class="form-group">
+            <label class="form-label">Extra Links (Optional)</label>
+            <p class="form-hint">Add quick access links (e.g., Documentation, Issues)</p>
+
+            <!-- Existing links list -->
+            <div v-if="formData.extraLinks.length > 0" class="extra-links-list">
+              <div
+                v-for="(link, index) in formData.extraLinks"
+                :key="link.id"
+                class="extra-link-item"
+              >
+                <div class="link-info">
+                  <div class="link-name">{{ link.name }}</div>
+                  <div class="link-url">{{ link.url }}</div>
+                </div>
+                <div class="link-actions">
+                  <button type="button" class="link-action-btn" @click="openEditLinkForm(index)">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                      <path d="M11.333 2L14 4.667l-9.333 9.333H2v-2.667L11.333 2z" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                  </button>
+                  <button type="button" class="link-action-btn danger" @click="removeLink(index)">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                      <path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Add/Edit form -->
+            <div v-if="showLinkForm" class="link-form">
+              <div class="link-form-inputs">
+                <div>
+                  <input
+                    v-model="linkFormData.name"
+                    type="text"
+                    class="form-input"
+                    :class="{ error: linkErrors.name }"
+                    placeholder="Link name (e.g., Documentation)"
+                    maxlength="30"
+                  />
+                  <span v-if="linkErrors.name" class="error-message">{{ linkErrors.name }}</span>
+                </div>
+
+                <div>
+                  <input
+                    v-model="linkFormData.url"
+                    type="text"
+                    class="form-input"
+                    :class="{ error: linkErrors.url }"
+                    placeholder="Link URL (e.g., https://...)"
+                  />
+                  <span v-if="linkErrors.url" class="error-message">{{ linkErrors.url }}</span>
+                </div>
+              </div>
+              <div class="link-form-actions">
+                <button type="button" class="form-button secondary small" @click="cancelLinkForm">
+                  Cancel
+                </button>
+                <button type="button" class="form-button primary small" @click="saveLinkForm">
+                  {{ editingLinkIndex !== null ? 'Update' : 'Add' }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Add button -->
+            <button
+              v-if="!showLinkForm && formData.extraLinks.length < 10"
+              type="button"
+              class="add-link-button"
+              @click="openAddLinkForm"
+            >
+              + Add Extra Link
+            </button>
+
+            <div v-if="formData.extraLinks.length >= 10" class="form-hint warning">
+              Maximum 10 extra links reached
             </div>
           </div>
 
@@ -1101,6 +1275,216 @@ onUnmounted(() => {
   .preview-icon {
     width: 80px;
     height: 80px;
+  }
+
+  .extra-links-list {
+    gap: 6px;
+  }
+
+  .extra-link-item {
+    padding: 10px;
+  }
+
+  .link-actions {
+    gap: 4px;
+  }
+}
+
+/* Extra Links Styles */
+.form-hint {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.5);
+  margin-bottom: 12px;
+  margin-top: -8px;
+}
+
+.form-hint.warning {
+  color: #FF9500;
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
+.extra-links-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.extra-link-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  transition: all var(--transition-fast);
+}
+
+.extra-link-item:hover {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+.link-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.link-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.9);
+  margin-bottom: 4px;
+}
+
+.link-url {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.link-actions {
+  display: flex;
+  gap: 6px;
+  margin-left: 12px;
+}
+
+.link-action-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, 0.7);
+  transition: all var(--transition-fast);
+  border: none;
+  cursor: pointer;
+}
+
+.link-action-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+  transform: scale(1.05);
+}
+
+.link-action-btn.danger {
+  color: #FF3B30;
+}
+
+.link-action-btn.danger:hover {
+  background: rgba(255, 59, 48, 0.1);
+}
+
+.add-link-button {
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: rgba(0, 122, 255, 0.05);
+  color: #007AFF;
+  border: 1px dashed rgba(0, 122, 255, 0.3);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.add-link-button:hover {
+  background: rgba(0, 122, 255, 0.1);
+  border-color: rgba(0, 122, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+.add-link-button:active {
+  transform: scale(0.98);
+}
+
+/* Link form styles */
+.link-form {
+  padding: 16px;
+  background: rgba(0, 122, 255, 0.05);
+  border: 1px solid rgba(0, 122, 255, 0.2);
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.link-form-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.link-form-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.form-button.small {
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+/* Dark mode styles */
+@media (prefers-color-scheme: dark) {
+  .form-hint {
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .extra-link-item {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .extra-link-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+
+  .link-name {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .link-url {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .link-action-btn {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .link-action-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .link-action-btn.danger {
+    color: #FF453A;
+  }
+
+  .link-action-btn.danger:hover {
+    background: rgba(255, 69, 58, 0.2);
+  }
+
+  .add-link-button {
+    background: rgba(10, 132, 255, 0.1);
+    color: #0A84FF;
+    border-color: rgba(10, 132, 255, 0.3);
+  }
+
+  .add-link-button:hover {
+    background: rgba(10, 132, 255, 0.15);
+    border-color: rgba(10, 132, 255, 0.5);
+  }
+
+  .link-form {
+    background: rgba(10, 132, 255, 0.1);
+    border-color: rgba(10, 132, 255, 0.3);
   }
 }
 </style>
