@@ -3,8 +3,11 @@
 A beautiful macOS Launchpad-inspired bookmark manager that opens websites in your default browser.
 
 ![webOS](https://img.shields.io/badge/Vue-3.5-4FC08D?style=flat&logo=vue.js&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?style=flat&logo=typescript&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-7.3-646CFF?style=flat&logo=vite&logoColor=white)
 ![Pinia](https://img.shields.io/badge/Pinia-3.0-FFD859?style=flat&logo=pinia&logoColor=black)
+![Vitest](https://img.shields.io/badge/Vitest-1.6-6E9F18?style=flat&logo=vitest&logoColor=white)
+![Coverage](https://img.shields.io/badge/Coverage-80%25+-success?style=flat)
 
 ## Features
 
@@ -81,10 +84,12 @@ npm run preview
 
 ## Tech Stack
 
-- **Vue 3** - Composition API
+- **Vue 3** - Composition API with TypeScript
+- **TypeScript** - Full type safety
 - **Pinia** - State management
 - **Vite** - Build tool
 - **VueDraggable** - Drag & drop functionality
+- **Vitest** - Unit testing framework
 - **localStorage** - Data persistence
 
 ## Project Structure
@@ -119,16 +124,62 @@ webOS/
 ## Development
 
 ### File Structure
-- `src/stores/websitesStore.js` - Main data store (CRUD operations)
-- `src/stores/uiStore.js` - UI state (modals, search)
+- `src/stores/websitesStore.ts` - Main data store (CRUD operations)
+- `src/stores/uiStore.ts` - UI state (modals, search)
 - `src/components/grid/WebsiteGrid.vue` - Main grid with drag & drop
 - `src/components/grid/WebsiteIcon.vue` - Individual website icon
+- `src/types/index.ts` - TypeScript type definitions
+
+### TypeScript
+
+The entire codebase is written in TypeScript for type safety:
+
+```bash
+# Type check
+npm run type-check
+
+# Build (includes type checking)
+npm run build
+```
+
+**Key Type Definitions:**
+- `Website` - Website data model
+- `Tag` - Tag/category model
+- `Settings` - App settings
+- `Notification` - Toast notification model
+
+### Testing
+
+Comprehensive test suite with Vitest:
+
+```bash
+# Run tests
+npm test
+
+# Run tests once
+npm run test:run
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run tests with UI
+npm run test:ui
+```
+
+**Test Coverage:**
+- Utilities: 100% (validators, storage, favicon, errors, tag matching)
+- Stores: 98%+ (websitesStore, uiStore, notificationStore)
+- Composables: 100% (useDebounce, useNotification, form validation)
+- Components: 75%+ (forms, layouts, common components)
+
+**Overall Coverage: 80%+**
 
 ### Adding Features
 The codebase is modular and easy to extend:
-- Add new gradient themes in `utils/constants.js`
+- Add new gradient themes in `utils/constants.ts`
 - Customize grid layout in `assets/styles/variables.css`
-- Extend data model in `stores/websitesStore.js`
+- Extend data model in `stores/websitesStore.ts`
+- All changes are type-safe with TypeScript
 
 ## License
 
