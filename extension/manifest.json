@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "webOS - Bookmark Manager",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "A macOS Launchpad-inspired bookmark manager that replaces your new tab page",
   "permissions": [
     "storage",

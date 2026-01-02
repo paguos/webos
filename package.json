@@ -1,7 +1,7 @@
 {
   "name": "webos",
   "private": true,
-  "version": "1.0.0",
+  "version": "0.1.0-rc",
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
@@ -57,11 +57,55 @@
       "electron/**/*"
     ],
     "mac": {
-      "category": "public.app-category.productivity"
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.icns",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["arm64", "x64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["arm64", "x64"]
+        }
+      ],
+      "darkModeSupport": true,
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false
     },
-    "win": {},
+    "dmg": {
+      "title": "${productName} ${version}",
+      "window": {
+        "width": 540,
+        "height": 380
+      }
+    },
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
     "linux": {
-      "category": "Utility"
+      "category": "Utility",
+      "icon": "build/icon.png",
+      "target": ["AppImage", "deb", "rpm"],
+      "desktop": {
+        "Name": "webOS",
+        "Comment": "macOS Launchpad-inspired bookmark manager",
+        "Categories": "Utility;",
+        "StartupWMClass": "webOS"
+      }
     }
   }
 }
