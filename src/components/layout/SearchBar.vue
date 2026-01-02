@@ -1,90 +1,59 @@
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useUIStore } from '../../stores/uiStore.ts'
 import { useWebsitesStore } from '../../stores/websitesStore.ts'
+import { useDebouncedFn } from '../../composables/useDebounce'
+import {
+  isTagQuery as checkIsTagQuery,
+  parseTagQuery,
+  findMatchingTag,
+  filterTags
+} from '../../utils/tagMatching'
 
 const uiStore = useUIStore()
 const websitesStore = useWebsitesStore()
-const searchInput = ref(null)
+const searchInput = ref<HTMLInputElement | null>(null)
+
+// Local search state (immediate for UI responsiveness)
+const localSearchQuery = ref(uiStore.searchQuery)
 
 // Tag suggestions state
 const showTagSuggestions = ref(false)
 const highlightedIndex = ref(-1)
 const positionUpdateTrigger = ref(0) // Used to trigger position recalculation
 
+// Debounced search update to store (reduces re-renders)
+const updateSearchQuery = useDebouncedFn((value: string) => {
+  uiStore.setSearchQuery(value)
+}, 300)
+
 // Detect if user is typing a tag query
-const isTagQuery = computed(() => {
-  const query = uiStore.searchQuery.toLowerCase().trim()
-  return query.startsWith('tag:')
+const isTagQueryActive = computed(() => {
+  return checkIsTagQuery(localSearchQuery.value)
 })
 
 // Extract the tag filter part (text after "tag:")
 const tagFilterText = computed(() => {
-  if (!isTagQuery.value) return ''
-  return uiStore.searchQuery.slice(4).toLowerCase().trim()
+  return parseTagQuery(localSearchQuery.value)
 })
 
 // Filter tags based on text after "tag:"
 const filteredTagSuggestions = computed(() => {
-  if (!isTagQuery.value) return []
-
-  const filterText = tagFilterText.value
-  const allTags = websitesStore.tags
-
-  if (!filterText) {
-    // Show all tags when just "tag:" is typed
-    return allTags
-  }
-
-  // Filter tags by name
-  return allTags.filter(tag =>
-    tag.name.toLowerCase().includes(filterText)
-  )
+  if (!isTagQueryActive.value) return []
+  return filterTags(websitesStore.tags, tagFilterText.value)
 })
 
 // Get the selected tag object if a complete tag query is active
-const selectedTag = computed(() => {
-  if (!isTagQuery.value) return null
-
-  const afterTag = tagFilterText.value
-  if (!afterTag) return null
-
-  // Try to find the longest matching tag at the start of the text
-  // This handles both "tag:work github" and "tag:workgithub"
-  let matchedTag = null
-  let maxLength = 0
-
-  for (const tag of websitesStore.tags) {
-    const tagNameLower = tag.name.toLowerCase()
-    const afterTagLower = afterTag.toLowerCase()
-
-    // Check if the text starts with this tag name
-    if (afterTagLower.startsWith(tagNameLower)) {
-      // Keep the longest match
-      if (tagNameLower.length > maxLength) {
-        matchedTag = tag
-        maxLength = tagNameLower.length
-      }
-    }
-  }
-
-  return matchedTag
+const tagQueryResult = computed(() => {
+  if (!isTagQueryActive.value) return { tag: null, additionalText: '' }
+  return findMatchingTag(tagFilterText.value, websitesStore.tags)
 })
 
-// Get additional search text after the tag
-const additionalSearchText = computed(() => {
-  if (!selectedTag.value) return ''
-
-  const afterTag = tagFilterText.value
-  const tagNameLength = selectedTag.value.name.length
-
-  // Return everything after the matched tag name
-  const remaining = afterTag.slice(tagNameLength).trim()
-  return remaining
-})
+const selectedTag = computed(() => tagQueryResult.value.tag)
+const additionalSearchText = computed(() => tagQueryResult.value.additionalText)
 
 // Position dropdown below search input (reactive to window resize/scroll)
-const suggestionsPosition = computed(() => {
+const suggestionsPosition = computed((): Record<string, string> => {
   // Depend on trigger to recalculate on resize/scroll
   positionUpdateTrigger.value // eslint-disable-line no-unused-expressions
 
@@ -104,11 +73,14 @@ function updateSuggestionsPosition() {
   positionUpdateTrigger.value++
 }
 
-function handleInput(e) {
-  const value = e.target.value
-  uiStore.setSearchQuery(value)
+function handleInput(e: Event) {
+  const value = (e.target as HTMLInputElement).value
+  localSearchQuery.value = value
 
-  // Show tag suggestions if typing "tag:"
+  // Update store with debounce (reduces re-renders in WebsiteGrid)
+  updateSearchQuery(value)
+
+  // Show tag suggestions if typing "tag:" (immediate, no debounce for UI)
   if (value.toLowerCase().startsWith('tag:')) {
     showTagSuggestions.value = true
     highlightedIndex.value = -1
@@ -118,6 +90,7 @@ function handleInput(e) {
 }
 
 function clearSearch() {
+  localSearchQuery.value = ''
   uiStore.clearSearch()
   showTagSuggestions.value = false
   highlightedIndex.value = -1
@@ -126,9 +99,11 @@ function clearSearch() {
   }
 }
 
-function selectTagSuggestion(tag) {
+function selectTagSuggestion(tag: any) {
   // Autofill search with selected tag
-  uiStore.setSearchQuery(`tag:${tag.name}`)
+  const newQuery = `tag:${tag.name}`
+  localSearchQuery.value = newQuery
+  uiStore.setSearchQuery(newQuery)
   showTagSuggestions.value = false
   highlightedIndex.value = -1
 
@@ -141,7 +116,7 @@ function closeSuggestions() {
   highlightedIndex.value = -1
 }
 
-function handleKeydownInSuggestions(e) {
+function handleKeydownInSuggestions(e: KeyboardEvent) {
   // Handle keyboard shortcuts first
   if (e.key === '/' && document.activeElement !== searchInput.value) {
     e.preventDefault()
@@ -194,9 +169,10 @@ function handleKeydownInSuggestions(e) {
   }
 }
 
-function handleClickOutside(event) {
-  const searchBar = event.target.closest('.search-bar-container')
-  const suggestions = event.target.closest('.tag-suggestions')
+function handleClickOutside(event: MouseEvent) {
+  const target = event.target as HTMLElement
+  const searchBar = target.closest('.search-bar-container')
+  const suggestions = target.closest('.tag-suggestions')
 
   if (!searchBar && !suggestions) {
     closeSuggestions()
@@ -236,7 +212,7 @@ function openSettings() {
           class="search-input"
           :class="{ 'has-tag-pill': selectedTag }"
           placeholder="Search"
-          :value="uiStore.searchQuery"
+          :value="localSearchQuery"
           @input="handleInput"
         />
 
@@ -258,7 +234,7 @@ function openSettings() {
       </div>
 
       <button
-        v-if="uiStore.searchQuery"
+        v-if="localSearchQuery"
         class="clear-button"
         @click="clearSearch"
         aria-label="Clear search"

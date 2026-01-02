@@ -1,25 +1,18 @@
-<script setup>
-import { computed, ref, onMounted, onUnmounted } from 'vue'
+<script setup lang="ts">
+import { computed, onMounted, onUnmounted } from 'vue'
 import { useWebsitesStore } from '../../stores/websitesStore.ts'
 import { useUIStore } from '../../stores/uiStore.ts'
 import draggable from 'vuedraggable'
 import WebsiteIcon from './WebsiteIcon.vue'
+import {
+  isTagQuery,
+  parseTagQuery,
+  findMatchingTag
+} from '../../utils/tagMatching'
+import type { Website } from '../../types'
 
 const websitesStore = useWebsitesStore()
 const uiStore = useUIStore()
-
-// Drag state
-const dragOptions = computed(() => ({
-  animation: 300, // Smooth iOS-like animation
-  delay: 0, // No delay since we handle long press separately
-  delayOnTouchOnly: false,
-  touchStartThreshold: 5,
-  forceFallback: false,
-  disabled: !uiStore.isEditMode || isSearching.value,
-  ghostClass: 'ghost',
-  dragClass: 'drag',
-  chosenClass: 'chosen'
-}))
 
 // Use a local ref for draggable to work properly
 const localWebsites = computed({
@@ -50,32 +43,19 @@ const filteredWebsites = computed(() => {
   }
 
   // Check if this is a tag query
-  if (query.startsWith('tag:')) {
-    const afterTag = query.slice(4).trim()
+  if (isTagQuery(query)) {
+    const afterTag = parseTagQuery(query)
 
     if (!afterTag) {
       // Just "tag:" typed - show all websites
       return currentPageSites
     }
 
-    // Try to find the longest matching tag at the start of the text
-    // This handles both "tag:work github" and "tag:workgithub"
-    let matchingTag = null
-    let maxLength = 0
-
-    for (const tag of websitesStore.tags) {
-      const tagNameLower = tag.name.toLowerCase()
-      const afterTagLower = afterTag.toLowerCase()
-
-      // Check if the text starts with this tag name
-      if (afterTagLower.startsWith(tagNameLower)) {
-        // Keep the longest match
-        if (tagNameLower.length > maxLength) {
-          matchingTag = tag
-          maxLength = tagNameLower.length
-        }
-      }
-    }
+    // Find matching tag using extracted utility
+    const { tag: matchingTag, additionalText } = findMatchingTag(
+      afterTag,
+      websitesStore.tags
+    )
 
     if (!matchingTag) {
       // Tag doesn't exist - show no results
@@ -83,17 +63,14 @@ const filteredWebsites = computed(() => {
     }
 
     // Filter websites that have this tag
-    let results = currentPageSites.filter(website =>
+    let results = currentPageSites.filter((website: Website) =>
       website.tagIds && website.tagIds.includes(matchingTag.id)
     )
 
-    // Get additional search text after the matched tag name
-    const additionalSearch = afterTag.slice(maxLength).trim()
-
     // If there's additional search text, filter by website name
-    if (additionalSearch) {
-      results = results.filter(website =>
-        website.name.toLowerCase().includes(additionalSearch.toLowerCase())
+    if (additionalText) {
+      results = results.filter((website: Website) =>
+        website.name.toLowerCase().includes(additionalText.toLowerCase())
       )
     }
 
@@ -101,7 +78,7 @@ const filteredWebsites = computed(() => {
   }
 
   // Regular substring search by name only
-  return currentPageSites.filter(website => {
+  return currentPageSites.filter((website: Website) => {
     return website.name.toLowerCase().includes(query)
   })
 })
@@ -109,9 +86,9 @@ const filteredWebsites = computed(() => {
 const hasResults = computed(() => filteredWebsites.value.length > 0)
 const isSearching = computed(() => uiStore.searchQuery.length > 0)
 
-function triggerHaptic(style = 'medium') {
+function triggerHaptic(style: 'light' | 'medium' | 'heavy' | 'selection' | 'dragStart' | 'dragEnd' = 'medium') {
   if ('vibrate' in navigator) {
-    const patterns = {
+    const patterns: Record<string, number[]> = {
       light: [10],
       medium: [20],
       heavy: [30],
@@ -124,10 +101,15 @@ function triggerHaptic(style = 'medium') {
 }
 
 // Handle escape key to exit edit mode
-function handleKeydown(e) {
+function handleKeydown(e: KeyboardEvent) {
   if (e.key === 'Escape' && uiStore.isEditMode) {
     uiStore.exitEditMode()
   }
+}
+
+// Open website form to add new website
+function handleAddWebsite() {
+  uiStore.openWebsiteForm()
 }
 
 onMounted(() => {
