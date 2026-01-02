@@ -1,5 +1,6 @@
 import type { StorageData } from '../types'
 import electronStorage from './electronStorage'
+import chromeStorage from './chromeStorage'
 import { StorageFullError } from './errors'
 
 const STORAGE_PREFIX = 'webOS_'
@@ -27,13 +28,22 @@ interface StorageAvailability {
 
 // Detect environment
 const isElectron = (): boolean => !!(window as any).electronAPI?.isElectron
+const isChromeExtension = (): boolean => {
+  return typeof chrome !== 'undefined' &&
+         chrome.storage &&
+         chrome.storage.local
+}
 
 // Initialize storage on load
 let initialized = false
 
 async function ensureInitialized(): Promise<void> {
-  if (!initialized && isElectron()) {
-    await electronStorage.initialize()
+  if (!initialized) {
+    if (isElectron()) {
+      await electronStorage.initialize()
+    } else if (isChromeExtension()) {
+      await chromeStorage.initialize()
+    }
     initialized = true
   }
 }
@@ -121,8 +131,12 @@ const localStorageBackend: StorageBackend = {
   }
 }
 
-// Use Electron storage if available, fallback to localStorage
-const storageBackend: StorageBackend = isElectron() ? electronStorage : localStorageBackend
+// Select storage backend based on environment
+const storageBackend: StorageBackend = isElectron()
+  ? electronStorage
+  : isChromeExtension()
+    ? chromeStorage
+    : localStorageBackend
 
 export const storage = {
   /**
@@ -184,6 +198,15 @@ export const storage = {
         available: true,
         type: 'electron-file-system',
         unlimited: true
+      }
+    }
+
+    if (isChromeExtension()) {
+      return {
+        available: true,
+        type: 'chrome-storage-local',
+        quota: '~10MB',
+        unlimited: false
       }
     }
 

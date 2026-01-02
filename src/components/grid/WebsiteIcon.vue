@@ -4,6 +4,7 @@ import { useWebsitesStore } from '../../stores/websitesStore.ts'
 import { useUIStore } from '../../stores/uiStore.ts'
 import { useLongPress } from '../../composables/useLongPress'
 import type { Website, ExtraLink } from '../../types'
+import { openUrl } from '../../utils/urlOpener'
 
 interface Props {
   website: Website
@@ -53,26 +54,16 @@ function handleClick(event: MouseEvent): void {
   // Track visit
   websitesStore.visitWebsite(props.website.id)
 
-  // Open in default browser (Electron) or new tab (web)
-  if ((window as any).electronAPI?.shell?.openExternal) {
-    // Electron: Open in system default browser
-    (window as any).electronAPI.shell.openExternal(props.website.url)
-  } else {
-    // Web: Open in new tab
-    window.open(props.website.url, '_blank')
-  }
+  // Open URL using appropriate method for the platform
+  openUrl(props.website.url)
 }
 
 function handleExtraLinkClick(extraLink: ExtraLink): void {
   // Track visit for the main website
   websitesStore.visitWebsite(props.website.id)
 
-  // Open extra link in default browser (Electron) or new tab (web)
-  if ((window as any).electronAPI?.shell?.openExternal) {
-    (window as any).electronAPI.shell.openExternal(extraLink.url)
-  } else {
-    window.open(extraLink.url, '_blank')
-  }
+  // Open extra link using appropriate method for the platform
+  openUrl(extraLink.url)
 }
 
 function handleContextMenu(e: MouseEvent): void {
