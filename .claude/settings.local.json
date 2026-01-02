@@ -22,7 +22,8 @@
       "Bash(grep:*)",
       "Bash(wc:*)",
       "Bash(npm run test:run:*)",
-      "Bash(npm run test:coverage:*)"
+      "Bash(npm run test:coverage:*)",
+      "Bash(npm run type-check:*)"
     ]
   }
 }

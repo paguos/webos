@@ -1,4 +1,4 @@
-import type { Website, Tag, Settings, TagWithCount, ConfirmDialogConfig } from '../types'
+import type { Website, Tag, Settings, ConfirmDialogConfig } from '../types'
 
 /**
  * Websites store state

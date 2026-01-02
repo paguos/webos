@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { useWebsitesStore } from '../websitesStore.ts'
-import type { Website, Tag } from '../../types'
 
 // Mock storage
 vi.mock('../../utils/storage.ts', () => ({

@@ -23,7 +23,7 @@ export async function fetchFavicon(url: string | null | undefined): Promise<stri
 
   for (const source of sources) {
     try {
-      const response = await fetch(source, {
+      await fetch(source, {
         method: 'HEAD',
         mode: 'no-cors' // Avoid CORS issues
       })
