@@ -2,7 +2,7 @@
   "name": "webos",
   "private": true,
   "version": "0.1.0-rc",
-  "author": "webOS Community",
+  "author": "Pablo Osinaga <paguos@gmail.com>",
   "description": "A macOS Launchpad-inspired bookmark manager",
   "type": "module",
   "main": "electron/main.cjs",
