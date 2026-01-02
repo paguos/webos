@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useWebsitesStore } from './stores/websitesStore.ts'
 import LaunchpadContainer from './components/layout/LaunchpadContainer.vue'
@@ -10,7 +10,7 @@ import Toast from './components/common/Toast.vue'
 
 const websitesStore = useWebsitesStore()
 const isLoading = ref(true)
-const loadError = ref(null)
+const loadError = ref<string | null>(null)
 
 onMounted(async () => {
   try {
@@ -18,11 +18,15 @@ onMounted(async () => {
     await websitesStore.initializeData()
   } catch (error) {
     console.error('Failed to load data:', error)
-    loadError.value = error.message
+    loadError.value = error instanceof Error ? error.message : 'Unknown error'
   } finally {
     isLoading.value = false
   }
 })
+
+function reloadPage(): void {
+  window.location.reload()
+}
 </script>
 
 <template>
@@ -40,7 +44,7 @@ onMounted(async () => {
       <div class="error-content">
         <h2>Failed to Load</h2>
         <p>{{ loadError }}</p>
-        <button @click="window.location.reload()" class="retry-button">
+        <button @click="reloadPage" class="retry-button">
           Retry
         </button>
       </div>

@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { useWebsitesStore } from '../../stores/websitesStore.ts'
 
@@ -8,7 +8,7 @@ const dots = computed(() => {
   return Array.from({ length: websitesStore.totalPages }, (_, i) => i)
 })
 
-function goToPage(page) {
+function goToPage(page: number): void {
   websitesStore.setCurrentPage(page)
 }
 </script>

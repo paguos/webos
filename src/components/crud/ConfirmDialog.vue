@@ -1,13 +1,13 @@
-<script setup>
+<script setup lang="ts">
 import { useUIStore } from '../../stores/uiStore.ts'
 
 const uiStore = useUIStore()
 
-function handleConfirm() {
+function handleConfirm(): void {
   uiStore.confirmDialogAction()
 }
 
-function handleCancel() {
+function handleCancel(): void {
   uiStore.closeConfirmDialog()
 }
 </script>

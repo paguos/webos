@@ -1,18 +1,17 @@
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useWebsitesStore } from '../../stores/websitesStore.ts'
 import { useUIStore } from '../../stores/uiStore.ts'
 import { useLongPress } from '../../composables/useLongPress'
+import type { Website, ExtraLink } from '../../types'
 
-const props = defineProps({
-  website: {
-    type: Object,
-    required: true
-  },
-  isEditMode: {
-    type: Boolean,
-    default: false
-  }
+interface Props {
+  website: Website
+  isEditMode?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  isEditMode: false
 })
 
 const websitesStore = useWebsitesStore()
@@ -44,7 +43,7 @@ const longPressHandlers = useLongPress(() => {
   }
 }, 500)
 
-function handleClick(event) {
+function handleClick(event: MouseEvent): void {
   // Prevent opening if in edit mode
   if (uiStore.isEditMode) {
     event.preventDefault()
@@ -55,28 +54,28 @@ function handleClick(event) {
   websitesStore.visitWebsite(props.website.id)
 
   // Open in default browser (Electron) or new tab (web)
-  if (window.electronAPI?.shell?.openExternal) {
+  if ((window as any).electronAPI?.shell?.openExternal) {
     // Electron: Open in system default browser
-    window.electronAPI.shell.openExternal(props.website.url)
+    (window as any).electronAPI.shell.openExternal(props.website.url)
   } else {
     // Web: Open in new tab
     window.open(props.website.url, '_blank')
   }
 }
 
-function handleExtraLinkClick(extraLink) {
+function handleExtraLinkClick(extraLink: ExtraLink): void {
   // Track visit for the main website
   websitesStore.visitWebsite(props.website.id)
 
   // Open extra link in default browser (Electron) or new tab (web)
-  if (window.electronAPI?.shell?.openExternal) {
-    window.electronAPI.shell.openExternal(extraLink.url)
+  if ((window as any).electronAPI?.shell?.openExternal) {
+    (window as any).electronAPI.shell.openExternal(extraLink.url)
   } else {
     window.open(extraLink.url, '_blank')
   }
 }
 
-function handleContextMenu(e) {
+function handleContextMenu(e: MouseEvent): void {
   e.preventDefault()
   contextMenuPosition.value = { x: e.clientX, y: e.clientY }
   showContextMenu.value = true
@@ -91,11 +90,11 @@ function handleContextMenu(e) {
   }, 0)
 }
 
-function handleEdit() {
+function handleEdit(): void {
   uiStore.openWebsiteForm(props.website)
 }
 
-function handleDelete() {
+function handleDelete(): void {
   uiStore.openConfirmDialog({
     title: 'Delete Website',
     message: `Are you sure you want to delete "${props.website.name}"?`,
@@ -107,7 +106,7 @@ function handleDelete() {
   })
 }
 
-function handleImageError() {
+function handleImageError(): void {
   imageError.value = true
 }
 </script>

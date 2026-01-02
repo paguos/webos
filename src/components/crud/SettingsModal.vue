@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useWebsitesStore } from '../../stores/websitesStore.ts'
 import { useUIStore } from '../../stores/uiStore.ts'
@@ -43,8 +43,9 @@ function handleImport() {
   const input = document.createElement('input')
   input.type = 'file'
   input.accept = 'application/json'
-  input.onchange = async (e) => {
-    const file = e.target.files[0]
+  input.onchange = async (e: Event) => {
+    const target = e.target as HTMLInputElement
+    const file = target.files?.[0]
     if (file) {
       try {
         const text = await file.text()

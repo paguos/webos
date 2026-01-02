@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { useWebsitesStore } from '../../stores/websitesStore.ts'
 import Navigation from './Navigation.vue'
@@ -7,7 +7,7 @@ import PaginationDots from './PaginationDots.vue'
 
 const websitesStore = useWebsitesStore()
 
-const backgroundStyle = computed(() => {
+const backgroundStyle = computed((): Record<string, string> => {
   const wallpaperUrl = websitesStore.settings.wallpaperUrl
 
   // If wallpaper is set, use it as background

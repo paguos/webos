@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { useWebsitesStore } from '../../stores/websitesStore.ts'
 import { useUIStore } from '../../stores/uiStore.ts'
@@ -11,7 +11,7 @@ const hasWebsites = computed(() => websitesStore.websites.length > 0)
 const isSearching = computed(() => uiStore.searchQuery.length > 0)
 const showEditButtons = computed(() => hasWebsites.value && !isSearching.value)
 
-function handleAddWebsite() {
+function handleAddWebsite(): void {
   uiStore.openWebsiteForm()
 }
 </script>

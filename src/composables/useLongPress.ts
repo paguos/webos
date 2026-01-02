@@ -1,20 +1,35 @@
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onUnmounted, type Ref } from 'vue'
+
+type HapticStyle = 'light' | 'medium' | 'heavy' | 'selection'
+
+interface LongPressHandlers {
+  onMousedown: (event: MouseEvent) => void
+  onMouseup: () => void
+  onMouseleave: () => void
+  onTouchstart: (event: TouchEvent) => void
+  onTouchend: () => void
+  onTouchcancel: () => void
+  triggerHaptic: (style?: HapticStyle) => void
+}
 
 /**
  * Composable for iOS-style long press detection
- * @param {Function} callback - Function to call when long press is detected
- * @param {Number} duration - Duration in ms (default 500ms like iOS)
- * @returns {Object} Event handlers
+ * @param callback - Function to call when long press is detected
+ * @param duration - Duration in ms (default 500ms like iOS)
+ * @returns Event handlers for long press detection
  */
-export function useLongPress(callback, duration = 500) {
-  const pressTimer = ref(null)
+export function useLongPress(
+  callback: (event: MouseEvent | TouchEvent) => void,
+  duration: number = 500
+): LongPressHandlers {
+  const pressTimer: Ref<ReturnType<typeof setTimeout> | null> = ref(null)
   const isPressed = ref(false)
 
   // Trigger haptic feedback if available
-  function triggerHaptic(style = 'medium') {
+  function triggerHaptic(style: HapticStyle = 'medium'): void {
     if ('vibrate' in navigator) {
       // iOS-style haptic patterns
-      const patterns = {
+      const patterns: Record<HapticStyle, number[]> = {
         light: [10],
         medium: [20],
         heavy: [30],
@@ -24,7 +39,7 @@ export function useLongPress(callback, duration = 500) {
     }
   }
 
-  function start(event) {
+  function start(event: MouseEvent | TouchEvent): void {
     // Prevent default to avoid text selection
     if (event.cancelable) {
       event.preventDefault()
@@ -40,7 +55,7 @@ export function useLongPress(callback, duration = 500) {
     }, duration)
   }
 
-  function cancel() {
+  function cancel(): void {
     if (pressTimer.value) {
       clearTimeout(pressTimer.value)
       pressTimer.value = null

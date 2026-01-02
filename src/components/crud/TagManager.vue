@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { useWebsitesStore } from '../../stores/websitesStore.ts'
 import { useUIStore } from '../../stores/uiStore.ts'
@@ -14,7 +14,7 @@ const tagName = ref('')
 const selectedColor = ref(TAG_COLORS[0])
 const editingTagId = ref(null)
 const editingTagName = ref('')
-const showColorPicker = ref(null) // null or tag id to show color picker for
+const showColorPicker = ref<string | null>(null) // null or tag id to show color picker for
 
 function handleAddTag() {
   if (!tagName.value.trim()) return
@@ -32,12 +32,12 @@ function handleAddTag() {
   tagName.value = ''
 }
 
-function startEditTag(tag) {
+function startEditTag(tag: any): void {
   editingTagId.value = tag.id
   editingTagName.value = tag.name
 }
 
-function saveEditTag(tagId) {
+function saveEditTag(tagId: string): void {
   if (!editingTagName.value.trim()) return
 
   // Check for duplicate names (excluding current tag)
@@ -58,7 +58,7 @@ function cancelEdit() {
   editingTagName.value = ''
 }
 
-function handleDeleteTag(tag) {
+function handleDeleteTag(tag: any): void {
   uiStore.openConfirmDialog({
     title: 'Delete Tag',
     message: `Delete "${tag.name}"? This will remove it from ${tag.count} website(s).`,
@@ -67,12 +67,12 @@ function handleDeleteTag(tag) {
   })
 }
 
-function handleColorChange(tagId, color) {
+function handleColorChange(tagId: string, color: string): void {
   websitesStore.updateTag(tagId, { color })
   showColorPicker.value = null
 }
 
-function toggleColorPicker(tagId) {
+function toggleColorPicker(tagId: string | null): void {
   showColorPicker.value = showColorPicker.value === tagId ? null : tagId
 }
 
@@ -175,7 +175,7 @@ function handleClose() {
               <button
                 class="tag-color-button large"
                 :style="{ backgroundColor: selectedColor }"
-                @click="showColorPicker = 'new'"
+                @click="toggleColorPicker('new')"
                 title="Choose color"
               ></button>
 
