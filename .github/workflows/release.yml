@@ -82,7 +82,7 @@ jobs:
         run: npm ci
 
       - name: Build Electron app
-        run: BUILD_TARGET=electron vite build && electron-builder --publish never
+        run: npm run build:electron
 
       - name: Upload macOS artifacts
         uses: actions/upload-artifact@v4

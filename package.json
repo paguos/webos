@@ -10,7 +10,7 @@
     "dev": "vite",
     "dev:electron": "concurrently \"vite\" \"wait-on http://localhost:5173 && NODE_ENV=development electron .\"",
     "build": "vite build",
-    "build:electron": "BUILD_TARGET=electron vite build && electron-builder",
+    "build:electron": "BUILD_TARGET=electron vite build && electron-builder --publish never",
     "build:extension": "BUILD_TARGET=extension vite build && npm run extension:copy",
     "extension:copy": "node scripts/build-extension.js",
     "preview": "vite preview",
