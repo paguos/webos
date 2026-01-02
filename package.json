@@ -2,6 +2,8 @@
   "name": "webos",
   "private": true,
   "version": "0.1.0-rc",
+  "author": "webOS Community",
+  "description": "A macOS Launchpad-inspired bookmark manager",
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
@@ -101,10 +103,12 @@
       "icon": "build/icon.png",
       "target": ["AppImage", "deb", "rpm"],
       "desktop": {
-        "Name": "webOS",
-        "Comment": "macOS Launchpad-inspired bookmark manager",
-        "Categories": "Utility;",
-        "StartupWMClass": "webOS"
+        "entry": {
+          "Name": "webOS",
+          "Comment": "macOS Launchpad-inspired bookmark manager",
+          "Categories": "Utility;",
+          "StartupWMClass": "webOS"
+        }
       }
     }
   }
