@@ -181,3 +181,21 @@ export interface ValidationResult {
   isValid: boolean
   error?: string
 }
+
+/**
+ * Notification/Toast types
+ */
+export enum NotificationType {
+  SUCCESS = 'success',
+  ERROR = 'error',
+  WARNING = 'warning',
+  INFO = 'info'
+}
+
+export interface Notification {
+  id: string
+  type: NotificationType
+  message: string
+  duration?: number
+  dismissible?: boolean
+}

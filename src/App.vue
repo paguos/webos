@@ -6,6 +6,7 @@ import WebsiteForm from './components/crud/WebsiteForm.vue'
 import ConfirmDialog from './components/crud/ConfirmDialog.vue'
 import SettingsModal from './components/crud/SettingsModal.vue'
 import TagManager from './components/crud/TagManager.vue'
+import Toast from './components/common/Toast.vue'
 
 const websitesStore = useWebsitesStore()
 const isLoading = ref(true)
@@ -54,6 +55,9 @@ onMounted(async () => {
       <ConfirmDialog />
       <SettingsModal />
       <TagManager />
+
+      <!-- Toast Notifications -->
+      <Toast />
     </template>
   </div>
 </template>

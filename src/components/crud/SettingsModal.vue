@@ -2,9 +2,11 @@
 import { ref, watch } from 'vue'
 import { useWebsitesStore } from '../../stores/websitesStore.ts'
 import { useUIStore } from '../../stores/uiStore.ts'
+import { useNotification } from '../../composables/useNotification'
 
 const websitesStore = useWebsitesStore()
 const uiStore = useUIStore()
+const { showSuccess, showError } = useNotification()
 
 const wallpaperUrl = ref(websitesStore.settings.wallpaperUrl || '')
 
@@ -47,10 +49,10 @@ function handleImport() {
       try {
         const text = await file.text()
         const data = JSON.parse(text)
-        websitesStore.importData(data)
-        alert('Data imported successfully!')
+        await websitesStore.importData(data)
+        showSuccess('Data imported successfully!')
       } catch (error) {
-        alert('Failed to import data. Please check the file format.')
+        showError(error)
       }
     }
   }

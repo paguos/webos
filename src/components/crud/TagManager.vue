@@ -3,9 +3,12 @@ import { ref } from 'vue'
 import { useWebsitesStore } from '../../stores/websitesStore.ts'
 import { useUIStore } from '../../stores/uiStore.ts'
 import { TAG_COLORS } from '../../utils/constants.ts'
+import { useNotification } from '../../composables/useNotification'
+import { DuplicateError } from '../../utils/errors'
 
 const websitesStore = useWebsitesStore()
 const uiStore = useUIStore()
+const { showError } = useNotification()
 
 const tagName = ref('')
 const selectedColor = ref(TAG_COLORS[0])
@@ -21,7 +24,7 @@ function handleAddTag() {
     t => t.name.toLowerCase() === tagName.value.trim().toLowerCase()
   )
   if (duplicate) {
-    alert('A tag with this name already exists')
+    showError(new DuplicateError('tag'))
     return
   }
 
@@ -42,7 +45,7 @@ function saveEditTag(tagId) {
     t => t.id !== tagId && t.name.toLowerCase() === editingTagName.value.trim().toLowerCase()
   )
   if (duplicate) {
-    alert('A tag with this name already exists')
+    showError(new DuplicateError('tag'))
     return
   }
 

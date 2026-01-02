@@ -1,5 +1,6 @@
 import type { StorageData } from '../types'
 import electronStorage from './electronStorage'
+import { StorageFullError } from './errors'
 
 const STORAGE_PREFIX = 'webOS_'
 const STORAGE_VERSION = '1.0'
@@ -74,11 +75,11 @@ const localStorageBackend: StorageBackend = {
     } catch (e: any) {
       if (e.name === 'QuotaExceededError') {
         console.error('localStorage quota exceeded')
-        alert('Storage is full. Please delete some websites or export your data.')
+        throw new StorageFullError(e)
       } else {
         console.error(`Storage set error for key "${key}":`, e)
+        throw e
       }
-      return false
     }
   },
 
