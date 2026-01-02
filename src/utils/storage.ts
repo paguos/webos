@@ -3,6 +3,18 @@ import electronStorage from './electronStorage'
 import chromeStorage from './chromeStorage'
 import { StorageFullError } from './errors'
 
+// Declare chrome global for TypeScript
+declare global {
+  interface Window {
+    chrome?: {
+      storage?: {
+        local?: any
+      }
+    }
+  }
+  const chrome: any
+}
+
 const STORAGE_PREFIX = 'webOS_'
 const STORAGE_VERSION = '1.0'
 
@@ -20,6 +32,7 @@ interface StorageAvailability {
   available: boolean
   type?: string
   unlimited?: boolean
+  quota?: string
   usedBytes?: number
   usedKB?: string
   usedMB?: string

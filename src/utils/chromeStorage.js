@@ -98,6 +98,17 @@ const chromeStorage = {
     dataCache[key] = JSON.parse(JSON.stringify(value))
     // Use debounced save
     this.debouncedSave()
+    return true
+  },
+
+  remove(key) {
+    if (!dataCache) {
+      console.warn('Chrome storage not initialized')
+      return false
+    }
+    delete dataCache[key]
+    this.debouncedSave()
+    return true
   },
 
   clear() {
@@ -109,6 +120,7 @@ const chromeStorage = {
       timestamp: new Date().toISOString()
     }
     this.save()
+    return true
   },
 
   keys() {
