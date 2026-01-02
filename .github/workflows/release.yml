@@ -1,0 +1,244 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  # Gate all builds with tests
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run type-check
+
+      - name: Run tests
+        run: npm run test:run
+
+  # Build browser extension (fastest/cheapest runner)
+  build-extension:
+    name: Build Extension
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build extension
+        run: npm run build:extension
+
+      - name: Create extension archive
+        run: |
+          cd dist-extension
+          zip -r ../webOS-extension-${{ github.ref_name }}.zip .
+          cd ..
+
+      - name: Upload extension artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: extension
+          path: webOS-extension-${{ github.ref_name }}.zip
+
+  # Build macOS apps (arm64 + x64)
+  build-macos:
+    name: Build macOS
+    needs: test
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Electron app
+        run: npm run build:electron
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload macOS artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          path: |
+            release/*.dmg
+            release/*.zip
+            release/*-mac.zip
+
+  # Build Windows app (x64)
+  build-windows:
+    name: Build Windows
+    needs: test
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Electron app
+        run: npm run build:electron
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: release/*.exe
+
+  # Build Linux apps (AppImage, deb, rpm)
+  build-linux:
+    name: Build Linux
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Electron app
+        run: npm run build:electron
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Linux artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: |
+            release/*.AppImage
+            release/*.deb
+            release/*.rpm
+
+  # Create GitHub release with all artifacts
+  release:
+    name: Create Release
+    needs: [build-extension, build-macos, build-windows, build-linux]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Display structure of downloaded files
+        run: ls -R artifacts
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          echo "## Changes" > changelog.md
+          git log $(git describe --tags --abbrev=0 HEAD^)..HEAD --pretty=format:"- %s (%h)" >> changelog.md || echo "- Initial release" >> changelog.md
+          cat changelog.md
+
+      - name: Detect pre-release
+        id: prerelease
+        run: |
+          if [[ "${{ github.ref_name }}" =~ (alpha|beta|rc) ]]; then
+            echo "is_prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_prerelease=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: webOS ${{ github.ref_name }}
+          body: |
+            # webOS ${{ github.ref_name }}
+
+            A macOS Launchpad-inspired bookmark manager. Available as a browser extension and desktop app.
+
+            $(cat changelog.md)
+
+            ## Downloads
+
+            ### Browser Extension
+            - **Chrome/Edge Extension**: `webOS-extension-${{ github.ref_name }}.zip`
+              - Download and extract
+              - Open `chrome://extensions/` (Chrome) or `edge://extensions/` (Edge)
+              - Enable "Developer mode"
+              - Click "Load unpacked" and select the extracted folder
+
+            ### Desktop Apps
+
+            #### macOS
+            - **Apple Silicon (M1/M2/M3)**: `webOS-${{ github.ref_name }}-arm64.dmg`
+            - **Intel Mac**: `webOS-${{ github.ref_name }}-x64.dmg`
+            - **Note**: Right-click → Open to bypass Gatekeeper (unsigned build)
+
+            #### Windows
+            - **Windows 10/11 (64-bit)**: `webOS Setup ${{ github.ref_name }}.exe`
+            - **Note**: Click "More info" → "Run anyway" if SmartScreen appears (unsigned build)
+
+            #### Linux
+            - **Universal**: `webOS-${{ github.ref_name }}.AppImage` (make executable with `chmod +x`)
+            - **Debian/Ubuntu**: `webOS_${{ github.ref_name }}_amd64.deb`
+            - **Fedora/RHEL**: `webOS-${{ github.ref_name }}.x86_64.rpm`
+
+            ---
+
+            🤖 Generated with GitHub Actions
+          draft: false
+          prerelease: ${{ steps.prerelease.outputs.is_prerelease }}
+          files: |
+            artifacts/extension/*.zip
+            artifacts/macos/*.dmg
+            artifacts/macos/*.zip
+            artifacts/windows/*.exe
+            artifacts/linux/*.AppImage
+            artifacts/linux/*.deb
+            artifacts/linux/*.rpm
+          token: ${{ secrets.GITHUB_TOKEN }}
