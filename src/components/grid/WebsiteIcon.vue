@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useWebsitesStore } from '../../stores/websitesStore.ts'
 import { useUIStore } from '../../stores/uiStore.ts'
 import { useLongPress } from '../../composables/useLongPress'
-import type { Website, ExtraLink } from '../../types'
+import type { Website } from '../../types'
 import { openUrl } from '../../utils/urlOpener'
 
 interface Props {
@@ -18,24 +18,7 @@ const props = withDefaults(defineProps<Props>(), {
 const websitesStore = useWebsitesStore()
 const uiStore = useUIStore()
 
-const showContextMenu = ref(false)
-const contextMenuPosition = ref({ x: 0, y: 0 })
 const imageError = ref(false)
-
-// Check if website has extra links
-const hasExtraLinks = computed(() => {
-  return props.website.extraLinks && props.website.extraLinks.length > 0
-})
-
-// Sort extra links alphabetically by name
-const sortedExtraLinks = computed(() => {
-  if (!props.website.extraLinks || props.website.extraLinks.length === 0) {
-    return []
-  }
-  return [...props.website.extraLinks].sort((a, b) => {
-    return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
-  })
-})
 
 // Long press to enter edit mode (iOS-style)
 const longPressHandlers = useLongPress(() => {
@@ -58,31 +41,9 @@ function handleClick(event: MouseEvent): void {
   openUrl(props.website.url)
 }
 
-function handleExtraLinkClick(extraLink: ExtraLink): void {
-  // Track visit for the main website
-  websitesStore.visitWebsite(props.website.id)
-
-  // Open extra link using appropriate method for the platform
-  openUrl(extraLink.url)
-}
-
 function handleContextMenu(e: MouseEvent): void {
   e.preventDefault()
-  contextMenuPosition.value = { x: e.clientX, y: e.clientY }
-  showContextMenu.value = true
-
-  // Close context menu on click outside
-  const closeMenu = () => {
-    showContextMenu.value = false
-    document.removeEventListener('click', closeMenu)
-  }
-  setTimeout(() => {
-    document.addEventListener('click', closeMenu)
-  }, 0)
-}
-
-function handleEdit(): void {
-  uiStore.openWebsiteForm(props.website)
+  uiStore.openContextMenu(props.website, { x: e.clientX, y: e.clientY })
 }
 
 function handleDelete(): void {
@@ -146,56 +107,6 @@ function handleImageError(): void {
     <div class="icon-label text-shadow no-select">
       {{ website.name }}
     </div>
-
-    <!-- Context Menu -->
-    <Teleport to="body">
-      <div
-        v-if="showContextMenu"
-        class="context-menu"
-        :style="{
-          left: contextMenuPosition.x + 'px',
-          top: contextMenuPosition.y + 'px'
-        }"
-      >
-        <button class="context-menu-item" @click="handleClick">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="margin-right: 8px;">
-            <path d="M14 8H2M8 2v12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-          Open
-        </button>
-
-        <!-- Extra links section -->
-        <template v-if="hasExtraLinks">
-          <div class="context-menu-divider"></div>
-          <button
-            v-for="link in sortedExtraLinks"
-            :key="link.id"
-            class="context-menu-item"
-            @click="handleExtraLinkClick(link)"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="margin-right: 8px;">
-              <path d="M6.5 9.5l3-3M7.5 4.5h1c1.66 0 3 1.34 3 3v1M4.5 8.5h-1c-1.66 0-3-1.34-3-3v-1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
-            {{ link.name }}
-          </button>
-          <div class="context-menu-divider"></div>
-        </template>
-
-        <button class="context-menu-item" @click="handleEdit">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="margin-right: 8px;">
-            <path d="M11.333 2L14 4.667l-9.333 9.333H2v-2.667L11.333 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          Edit
-        </button>
-        <div class="context-menu-divider"></div>
-        <button class="context-menu-item danger" @click="handleDelete">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="margin-right: 8px;">
-            <path d="M2 4h12M5.333 4V2.667a1.333 1.333 0 011.334-1.334h2.666a1.333 1.333 0 011.334 1.334V4m2 0v9.333a1.333 1.333 0 01-1.334 1.334H4.667a1.333 1.333 0 01-1.334-1.334V4h9.334z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          Delete
-        </button>
-      </div>
-    </Teleport>
   </div>
 </template>
 
