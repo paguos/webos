@@ -100,6 +100,12 @@ function triggerHaptic(style: 'light' | 'medium' | 'heavy' | 'selection' | 'drag
   }
 }
 
+// Handle drag start
+function handleDragStart() {
+  triggerHaptic('dragStart')
+  console.log('Drag started')
+}
+
 // Handle escape key to exit edit mode
 function handleKeydown(e: KeyboardEvent) {
   if (e.key === 'Escape' && uiStore.isEditMode) {
@@ -134,7 +140,7 @@ onUnmounted(() => {
       chosen-class="chosen"
       :force-fallback="true"
       item-key="id"
-      @start="() => { triggerHaptic('dragStart'); console.log('Drag started') }"
+      @start="handleDragStart"
       @end="() => console.log('Drag ended')"
     >
       <template #item="{ element, index }">
@@ -289,19 +295,15 @@ onUnmounted(() => {
 
 /* iOS-style Draggable states */
 .website-grid :deep(.ghost) {
-  opacity: 0.2;
+  opacity: 1;
   transform: scale(0.95);
   transition: opacity 0.15s ease-out, transform 0.15s ease-out;
 }
 
 .website-grid :deep(.drag) {
-  transform: scale(1.1);
-  opacity: 1;
-  z-index: var(--z-modal);
-  filter: drop-shadow(0 20px 50px rgba(0, 0, 0, 0.4));
-  cursor: grabbing !important;
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
-              filter 0.2s ease-out;
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
 }
 
 .website-grid :deep(.chosen) {
