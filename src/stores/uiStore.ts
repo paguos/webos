@@ -22,6 +22,9 @@ export const useUIStore = defineStore('ui', () => {
     cancelText: 'Cancel',
     onConfirm: null
   })
+  const showContextMenu: Ref<boolean> = ref(false)
+  const contextMenuPosition: Ref<{ x: number; y: number }> = ref({ x: 0, y: 0 })
+  const contextMenuWebsite: Ref<Website | null> = ref(null)
 
   // Actions
   function setSearchQuery(query: string): void {
@@ -111,6 +114,21 @@ export const useUIStore = defineStore('ui', () => {
     isEditMode.value = !isEditMode.value
   }
 
+  function openContextMenu(website: Website, position: { x: number; y: number }): void {
+    // Simply replace the existing menu with new one
+    contextMenuWebsite.value = website
+    contextMenuPosition.value = position
+    showContextMenu.value = true
+  }
+
+  function closeContextMenu(): void {
+    showContextMenu.value = false
+    setTimeout(() => {
+      contextMenuWebsite.value = null
+      contextMenuPosition.value = { x: 0, y: 0 }
+    }, 150)
+  }
+
   return {
     // State
     searchQuery,
@@ -124,6 +142,9 @@ export const useUIStore = defineStore('ui', () => {
     editingTag,
     activeFolderId,
     confirmDialogConfig,
+    showContextMenu,
+    contextMenuPosition,
+    contextMenuWebsite,
 
     // Actions
     setSearchQuery,
@@ -141,6 +162,8 @@ export const useUIStore = defineStore('ui', () => {
     closeTagManager,
     openConfirmDialog,
     closeConfirmDialog,
-    confirmDialogAction
+    confirmDialogAction,
+    openContextMenu,
+    closeContextMenu
   }
 })

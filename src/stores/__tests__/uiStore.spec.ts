@@ -303,4 +303,132 @@ describe('uiStore', () => {
       expect(store.showConfirmDialog).toBe(false)
     })
   })
+
+  describe('context menu', () => {
+    it('should initialize with context menu closed', () => {
+      const store = useUIStore()
+
+      expect(store.showContextMenu).toBe(false)
+      expect(store.contextMenuPosition).toEqual({ x: 0, y: 0 })
+      expect(store.contextMenuWebsite).toBeNull()
+    })
+
+    it('should open context menu with website and position', () => {
+      const store = useUIStore()
+      const website: Website = {
+        id: '1',
+        name: 'Test',
+        url: 'https://test.com',
+        favicon: '',
+        tagIds: [],
+        customIcon: null,
+        iconZoom: 1,
+        iconOffsetX: 0,
+        iconOffsetY: 0,
+        iconBackgroundColor: 'transparent',
+        extraLinks: [],
+        position: { page: 0, order: 0 },
+        metadata: {
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          visitCount: 0,
+          lastVisited: null
+        }
+      }
+      const position = { x: 100, y: 200 }
+
+      store.openContextMenu(website, position)
+
+      expect(store.showContextMenu).toBe(true)
+      expect(store.contextMenuPosition).toEqual(position)
+      expect(store.contextMenuWebsite).toStrictEqual(website)
+    })
+
+    it('should close context menu and clear state after timeout', async () => {
+      const store = useUIStore()
+      const website: Website = {
+        id: '1',
+        name: 'Test',
+        url: 'https://test.com',
+        favicon: '',
+        tagIds: [],
+        customIcon: null,
+        iconZoom: 1,
+        iconOffsetX: 0,
+        iconOffsetY: 0,
+        iconBackgroundColor: 'transparent',
+        extraLinks: [],
+        position: { page: 0, order: 0 },
+        metadata: {
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          visitCount: 0,
+          lastVisited: null
+        }
+      }
+
+      store.openContextMenu(website, { x: 100, y: 200 })
+      expect(store.showContextMenu).toBe(true)
+
+      store.closeContextMenu()
+      expect(store.showContextMenu).toBe(false)
+
+      // Wait for timeout to clear data
+      await new Promise(resolve => setTimeout(resolve, 200))
+      expect(store.contextMenuWebsite).toBeNull()
+      expect(store.contextMenuPosition).toEqual({ x: 0, y: 0 })
+    })
+
+    it('should replace previous context menu when opening new one', () => {
+      const store = useUIStore()
+      const website1: Website = {
+        id: '1',
+        name: 'Test 1',
+        url: 'https://test1.com',
+        favicon: '',
+        tagIds: [],
+        customIcon: null,
+        iconZoom: 1,
+        iconOffsetX: 0,
+        iconOffsetY: 0,
+        iconBackgroundColor: 'transparent',
+        extraLinks: [],
+        position: { page: 0, order: 0 },
+        metadata: {
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          visitCount: 0,
+          lastVisited: null
+        }
+      }
+      const website2: Website = {
+        id: '2',
+        name: 'Test 2',
+        url: 'https://test2.com',
+        favicon: '',
+        tagIds: [],
+        customIcon: null,
+        iconZoom: 1,
+        iconOffsetX: 0,
+        iconOffsetY: 0,
+        iconBackgroundColor: 'transparent',
+        extraLinks: [],
+        position: { page: 0, order: 0 },
+        metadata: {
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          visitCount: 0,
+          lastVisited: null
+        }
+      }
+
+      store.openContextMenu(website1, { x: 100, y: 100 })
+      expect(store.contextMenuWebsite?.id).toBe('1')
+      expect(store.contextMenuPosition).toEqual({ x: 100, y: 100 })
+
+      store.openContextMenu(website2, { x: 200, y: 200 })
+      expect(store.contextMenuWebsite?.id).toBe('2')
+      expect(store.contextMenuPosition).toEqual({ x: 200, y: 200 })
+    })
+  })
 })

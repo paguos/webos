@@ -7,6 +7,7 @@ import ConfirmDialog from './components/crud/ConfirmDialog.vue'
 import SettingsModal from './components/crud/SettingsModal.vue'
 import TagManager from './components/crud/TagManager.vue'
 import Toast from './components/common/Toast.vue'
+import ContextMenu from './components/common/ContextMenu.vue'
 
 const websitesStore = useWebsitesStore()
 const isLoading = ref(true)
@@ -59,6 +60,7 @@ function reloadPage(): void {
       <ConfirmDialog />
       <SettingsModal />
       <TagManager />
+      <ContextMenu />
 
       <!-- Toast Notifications -->
       <Toast />
