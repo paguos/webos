@@ -381,6 +381,8 @@ describe('websitesStore', () => {
             tagIds: [],
             customIcon: null,
             iconZoom: 1,
+            iconOffsetX: 0,
+            iconOffsetY: 0,
             iconBackgroundColor: 'transparent',
             extraLinks: [],
             position: { page: 0, order: 0 },
