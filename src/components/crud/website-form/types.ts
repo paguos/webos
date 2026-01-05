@@ -6,6 +6,8 @@ export interface WebsiteFormData {
   tagIds: string[]
   customIcon: string
   iconZoom: number
+  iconOffsetX: number
+  iconOffsetY: number
   iconBackgroundColor: string
   extraLinks: ExtraLink[]
 }

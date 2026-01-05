@@ -6,6 +6,8 @@ describe('IconCustomization', () => {
   const defaultProps = {
     customIcon: '',
     iconZoom: 1,
+    iconOffsetX: 0,
+    iconOffsetY: 0,
     iconBackgroundColor: 'transparent',
     url: 'https://github.com'
   }
@@ -25,6 +27,8 @@ describe('IconCustomization', () => {
       props: {
         customIcon: 'https://example.com/icon.png',
         iconZoom: 1.5,
+        iconOffsetX: 0,
+        iconOffsetY: 0,
         iconBackgroundColor: '#FF0000',
         url: 'https://github.com'
       }
@@ -93,11 +97,12 @@ describe('IconCustomization', () => {
     })
 
     const zoomButtons = wrapper.findAll('.zoom-preset')
-    expect(zoomButtons.length).toBe(4)
-    expect(zoomButtons[0].text()).toBe('100%')
-    expect(zoomButtons[1].text()).toBe('125%')
-    expect(zoomButtons[2].text()).toBe('150%')
-    expect(zoomButtons[3].text()).toBe('200%')
+    expect(zoomButtons.length).toBe(5)
+    expect(zoomButtons[0].text()).toBe('50%')
+    expect(zoomButtons[1].text()).toBe('75%')
+    expect(zoomButtons[2].text()).toBe('100%')
+    expect(zoomButtons[3].text()).toBe('150%')
+    expect(zoomButtons[4].text()).toBe('200%')
   })
 
   it('should emit correct zoom value when preset is clicked', async () => {
@@ -106,7 +111,7 @@ describe('IconCustomization', () => {
     })
 
     const zoomButtons = wrapper.findAll('.zoom-preset')
-    await zoomButtons[2].trigger('click') // 150% button
+    await zoomButtons[3].trigger('click') // 150% button (now at index 3)
 
     expect(wrapper.emitted('update:iconZoom')).toBeTruthy()
     expect(wrapper.emitted('update:iconZoom')![0]).toEqual([1.5])
@@ -194,7 +199,7 @@ describe('IconCustomization', () => {
     })
 
     const previewImg = wrapper.find('.preview-icon img')
-    expect(previewImg.attributes('style')).toContain('transform: scale(1.5)')
+    expect(previewImg.attributes('style')).toContain('transform: scale(1.5) translate(0%, 0%)')
   })
 
   it('should use custom icon when provided instead of URL favicon', () => {
