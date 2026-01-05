@@ -12,6 +12,14 @@ export interface WebsiteFormData {
   extraLinks: ExtraLink[]
 }
 
+export interface IconCustomizationValues {
+  customIcon: string
+  iconZoom: number
+  iconOffsetX: number
+  iconOffsetY: number
+  iconBackgroundColor: string
+}
+
 export interface FormErrors {
   name: string
   url: string
