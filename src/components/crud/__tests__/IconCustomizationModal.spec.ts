@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import IconCustomizationModal from '../IconCustomizationModal.vue'
 import type { IconCustomizationValues } from '../website-form/types'
