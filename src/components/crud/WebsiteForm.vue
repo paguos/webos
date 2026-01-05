@@ -6,9 +6,10 @@ import { useWebsiteFormValidation } from '../../composables/useWebsiteFormValida
 import { normalizeUrl } from '../../utils/validators'
 import BasicInfoSection from './website-form/BasicInfoSection.vue'
 import TagSection from './website-form/TagSection.vue'
-import IconCustomization from './website-form/IconCustomization.vue'
+import IconPreview from './website-form/IconPreview.vue'
+import IconCustomizationModal from './IconCustomizationModal.vue'
 import ExtraLinksSection from './website-form/ExtraLinksSection.vue'
-import type { WebsiteFormData, FormErrors } from './website-form/types'
+import type { WebsiteFormData, FormErrors, IconCustomizationValues } from './website-form/types'
 
 const websitesStore = useWebsitesStore()
 const uiStore = useUIStore()
@@ -32,6 +33,7 @@ const errors = ref<FormErrors>({
 })
 
 const isEditing = computed(() => !!uiStore.editingWebsite)
+const showIconCustomizationModal = ref(false)
 
 // Watch for editing website changes
 watch(() => uiStore.editingWebsite, (website) => {
@@ -120,6 +122,30 @@ function handleCancel() {
   uiStore.closeWebsiteForm()
   resetForm()
 }
+
+function openIconCustomizationModal() {
+  showIconCustomizationModal.value = true
+}
+
+function handleIconCustomizationApply(values: IconCustomizationValues) {
+  formData.value.customIcon = values.customIcon
+  formData.value.iconZoom = values.iconZoom
+  formData.value.iconOffsetX = values.iconOffsetX
+  formData.value.iconOffsetY = values.iconOffsetY
+  formData.value.iconBackgroundColor = values.iconBackgroundColor
+  showIconCustomizationModal.value = false
+}
+
+function handleIconCustomizationClose() {
+  showIconCustomizationModal.value = false
+}
+
+// Close icon modal when parent form closes
+watch(() => uiStore.showWebsiteForm, (show) => {
+  if (!show) {
+    showIconCustomizationModal.value = false
+  }
+})
 </script>
 
 <template>
@@ -143,13 +169,14 @@ function handleCancel() {
             v-model:extra-links="formData.extraLinks"
           />
 
-          <IconCustomization
-            v-model:custom-icon="formData.customIcon"
-            v-model:icon-zoom="formData.iconZoom"
-            v-model:icon-offset-x="formData.iconOffsetX"
-            v-model:icon-offset-y="formData.iconOffsetY"
-            v-model:icon-background-color="formData.iconBackgroundColor"
+          <IconPreview
             :url="formData.url"
+            :custom-icon="formData.customIcon"
+            :icon-zoom="formData.iconZoom"
+            :icon-offset-x="formData.iconOffsetX"
+            :icon-offset-y="formData.iconOffsetY"
+            :icon-background-color="formData.iconBackgroundColor"
+            @edit-icon="openIconCustomizationModal"
           />
 
           <div class="form-actions">
@@ -162,6 +189,20 @@ function handleCancel() {
           </div>
         </form>
       </div>
+
+      <IconCustomizationModal
+        :visible="showIconCustomizationModal"
+        :url="formData.url"
+        :initial-values="{
+          customIcon: formData.customIcon,
+          iconZoom: formData.iconZoom,
+          iconOffsetX: formData.iconOffsetX,
+          iconOffsetY: formData.iconOffsetY,
+          iconBackgroundColor: formData.iconBackgroundColor
+        }"
+        @apply="handleIconCustomizationApply"
+        @close="handleIconCustomizationClose"
+      />
     </div>
   </Teleport>
 </template>
