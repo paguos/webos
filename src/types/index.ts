@@ -38,6 +38,8 @@ export interface Website {
   tagIds: string[]
   customIcon: string | null
   iconZoom: number
+  iconOffsetX: number
+  iconOffsetY: number
   iconBackgroundColor: string
   extraLinks: ExtraLink[]
   position: Position

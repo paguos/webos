@@ -139,6 +139,8 @@ export const useWebsitesStore = defineStore('websites', () => {
       tagIds: Array.isArray(tagIds) ? tagIds : [],
       customIcon: null,
       iconZoom: 1,
+      iconOffsetX: 0,
+      iconOffsetY: 0,
       iconBackgroundColor: 'transparent',
       extraLinks: [],
       position: { page, order },

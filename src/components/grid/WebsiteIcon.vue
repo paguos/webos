@@ -133,7 +133,7 @@ function handleImageError(): void {
           v-if="!imageError"
           :src="website.customIcon || website.favicon"
           :alt="website.name"
-          :style="{ transform: `scale(${website.iconZoom || 1})` }"
+          :style="{ transform: `scale(${website.iconZoom || 1}) translate(${website.iconOffsetX || 0}%, ${website.iconOffsetY || 0}%)` }"
           @error="handleImageError"
         />
         <svg v-else width="48" height="48" viewBox="0 0 48 48" fill="none">
@@ -292,7 +292,7 @@ function handleImageError(): void {
 .icon-image img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .icon-image svg {

@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { normalizeUrl } from '../../../utils/validators'
 
 interface Props {
   customIcon: string
   iconZoom: number
+  iconOffsetX: number
+  iconOffsetY: number
   iconBackgroundColor: string
   url: string
 }
@@ -12,11 +14,16 @@ interface Props {
 interface Emits {
   (e: 'update:customIcon', value: string): void
   (e: 'update:iconZoom', value: number): void
+  (e: 'update:iconOffsetX', value: number): void
+  (e: 'update:iconOffsetY', value: number): void
   (e: 'update:iconBackgroundColor', value: string): void
 }
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
+
+const isDragging = ref(false)
+const dragStart = ref({ x: 0, y: 0, offsetX: 0, offsetY: 0 })
 
 const zoomPercentage = computed(() => Math.round(props.iconZoom * 100))
 
@@ -36,6 +43,58 @@ function setZoom(value: number) {
 
 function setBackgroundColor(color: string) {
   emit('update:iconBackgroundColor', color)
+}
+
+function handleDragStart(e: MouseEvent | TouchEvent) {
+  isDragging.value = true
+
+  const clientX = e instanceof MouseEvent ? e.clientX : e.touches[0].clientX
+  const clientY = e instanceof MouseEvent ? e.clientY : e.touches[0].clientY
+
+  dragStart.value = {
+    x: clientX,
+    y: clientY,
+    offsetX: props.iconOffsetX,
+    offsetY: props.iconOffsetY
+  }
+
+  document.addEventListener('mousemove', handleDragMove)
+  document.addEventListener('mouseup', handleDragEnd)
+  document.addEventListener('touchmove', handleDragMove)
+  document.addEventListener('touchend', handleDragEnd)
+
+  e.preventDefault()
+}
+
+function handleDragMove(e: MouseEvent | TouchEvent) {
+  if (!isDragging.value) return
+
+  const clientX = e instanceof MouseEvent ? e.clientX : e.touches[0].clientX
+  const clientY = e instanceof MouseEvent ? e.clientY : e.touches[0].clientY
+
+  // Calculate drag delta
+  const deltaX = clientX - dragStart.value.x
+  const deltaY = clientY - dragStart.value.y
+
+  // Convert pixel delta to percentage delta
+  // Preview icon is 100px, so 1px = 1% of icon size
+  const percentDeltaX = deltaX
+  const percentDeltaY = deltaY
+
+  // Calculate new offset with clamping
+  const newOffsetX = Math.max(-50, Math.min(50, dragStart.value.offsetX + percentDeltaX))
+  const newOffsetY = Math.max(-50, Math.min(50, dragStart.value.offsetY + percentDeltaY))
+
+  emit('update:iconOffsetX', Math.round(newOffsetX))
+  emit('update:iconOffsetY', Math.round(newOffsetY))
+}
+
+function handleDragEnd() {
+  isDragging.value = false
+  document.removeEventListener('mousemove', handleDragMove)
+  document.removeEventListener('mouseup', handleDragEnd)
+  document.removeEventListener('touchmove', handleDragMove)
+  document.removeEventListener('touchend', handleDragEnd)
 }
 </script>
 
@@ -61,17 +120,60 @@ function setBackgroundColor(color: string) {
         id="icon-zoom"
         :value="iconZoom"
         type="range"
-        min="1"
+        min="0.5"
         max="2"
         step="0.05"
         class="form-slider"
         @input="emit('update:iconZoom', parseFloat(($event.target as HTMLInputElement).value))"
       />
       <div class="zoom-controls">
+        <button type="button" class="zoom-preset" @click="setZoom(0.5)">50%</button>
+        <button type="button" class="zoom-preset" @click="setZoom(0.75)">75%</button>
         <button type="button" class="zoom-preset" @click="setZoom(1)">100%</button>
-        <button type="button" class="zoom-preset" @click="setZoom(1.25)">125%</button>
         <button type="button" class="zoom-preset" @click="setZoom(1.5)">150%</button>
         <button type="button" class="zoom-preset" @click="setZoom(2)">200%</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="icon-offset-x" class="form-label">
+        Horizontal Position ({{ iconOffsetX > 0 ? '+' : '' }}{{ iconOffsetX }}%)
+      </label>
+      <input
+        id="icon-offset-x"
+        :value="iconOffsetX"
+        type="range"
+        min="-50"
+        max="50"
+        step="1"
+        class="form-slider"
+        @input="emit('update:iconOffsetX', parseFloat(($event.target as HTMLInputElement).value))"
+      />
+      <div class="offset-controls">
+        <button type="button" class="offset-preset" @click="emit('update:iconOffsetX', -50)">Left</button>
+        <button type="button" class="offset-preset" @click="emit('update:iconOffsetX', 0)">Center</button>
+        <button type="button" class="offset-preset" @click="emit('update:iconOffsetX', 50)">Right</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="icon-offset-y" class="form-label">
+        Vertical Position ({{ iconOffsetY > 0 ? '+' : '' }}{{ iconOffsetY }}%)
+      </label>
+      <input
+        id="icon-offset-y"
+        :value="iconOffsetY"
+        type="range"
+        min="-50"
+        max="50"
+        step="1"
+        class="form-slider"
+        @input="emit('update:iconOffsetY', parseFloat(($event.target as HTMLInputElement).value))"
+      />
+      <div class="offset-controls">
+        <button type="button" class="offset-preset" @click="emit('update:iconOffsetY', -50)">Top</button>
+        <button type="button" class="offset-preset" @click="emit('update:iconOffsetY', 0)">Middle</button>
+        <button type="button" class="offset-preset" @click="emit('update:iconOffsetY', 50)">Bottom</button>
       </div>
     </div>
 
@@ -108,14 +210,27 @@ function setBackgroundColor(color: string) {
     </div>
 
     <div v-if="url || customIcon" class="form-group">
-      <label class="form-label">Icon Preview</label>
+      <label class="form-label">
+        Icon Preview
+        <span class="preview-hint">(drag to reposition)</span>
+      </label>
       <div class="icon-preview">
-        <div class="preview-icon" :style="{ backgroundColor: iconBackgroundColor }">
+        <div
+          class="preview-icon"
+          :style="{ backgroundColor: iconBackgroundColor }"
+          :class="{ 'is-dragging': isDragging }"
+        >
           <img
             v-if="iconSrc"
             :src="iconSrc"
-            :style="{ transform: `scale(${iconZoom})` }"
+            :style="{
+              transform: `scale(${iconZoom}) translate(${iconOffsetX}%, ${iconOffsetY}%)`,
+              cursor: isDragging ? 'grabbing' : 'grab'
+            }"
             alt="Icon preview"
+            draggable="false"
+            @mousedown="handleDragStart"
+            @touchstart="handleDragStart"
           />
         </div>
       </div>
@@ -224,6 +339,34 @@ function setBackgroundColor(color: string) {
   transform: scale(0.95);
 }
 
+.offset-controls {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.offset-preset {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  background: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, 0.7);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.offset-preset:hover {
+  background: rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.offset-preset:active {
+  transform: scale(0.95);
+}
+
 .color-picker-container {
   display: flex;
   gap: 12px;
@@ -288,6 +431,13 @@ function setBackgroundColor(color: string) {
   border: 1px dashed rgba(0, 0, 0, 0.1);
 }
 
+.preview-hint {
+  font-size: 11px;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.5);
+  margin-left: 8px;
+}
+
 .preview-icon {
   width: 100px;
   height: 100px;
@@ -304,11 +454,19 @@ function setBackgroundColor(color: string) {
   overflow: hidden;
 }
 
+.preview-icon.is-dragging {
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4),
+              0 2px 6px rgba(0, 0, 0, 0.2),
+              inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
 .preview-icon img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   transition: transform 0.2s ease-out;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -350,6 +508,19 @@ function setBackgroundColor(color: string) {
 
   .zoom-preset:hover {
     background: rgba(255, 255, 255, 0.1);
+  }
+
+  .offset-preset {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .offset-preset:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .preview-hint {
+    color: rgba(255, 255, 255, 0.5);
   }
 
   .icon-preview {

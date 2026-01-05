@@ -20,6 +20,8 @@ const formData = ref<WebsiteFormData>({
   tagIds: [],
   customIcon: '',
   iconZoom: 1,
+  iconOffsetX: 0,
+  iconOffsetY: 0,
   iconBackgroundColor: 'transparent',
   extraLinks: []
 })
@@ -40,6 +42,8 @@ watch(() => uiStore.editingWebsite, (website) => {
       tagIds: website.tagIds || [],
       customIcon: website.customIcon || '',
       iconZoom: website.iconZoom || 1,
+      iconOffsetX: website.iconOffsetX || 0,
+      iconOffsetY: website.iconOffsetY || 0,
       iconBackgroundColor: website.iconBackgroundColor || 'transparent',
       extraLinks: website.extraLinks || []
     }
@@ -55,6 +59,8 @@ function resetForm() {
     tagIds: [],
     customIcon: '',
     iconZoom: 1,
+    iconOffsetX: 0,
+    iconOffsetY: 0,
     iconBackgroundColor: 'transparent',
     extraLinks: []
   }
@@ -80,6 +86,8 @@ function handleSubmit() {
       tagIds: formData.value.tagIds || [],
       customIcon: formData.value.customIcon || null,
       iconZoom: formData.value.iconZoom,
+      iconOffsetX: formData.value.iconOffsetX,
+      iconOffsetY: formData.value.iconOffsetY,
       iconBackgroundColor: formData.value.iconBackgroundColor,
       extraLinks: formData.value.extraLinks || []
     })
@@ -92,10 +100,12 @@ function handleSubmit() {
       websitesStore.currentPage
     )
     // Update custom properties if different from defaults
-    if (formData.value.customIcon || formData.value.iconZoom !== 1 || formData.value.iconBackgroundColor !== 'transparent' || formData.value.extraLinks.length > 0) {
+    if (formData.value.customIcon || formData.value.iconZoom !== 1 || formData.value.iconOffsetX !== 0 || formData.value.iconOffsetY !== 0 || formData.value.iconBackgroundColor !== 'transparent' || formData.value.extraLinks.length > 0) {
       websitesStore.updateWebsite(website.id, {
         customIcon: formData.value.customIcon || null,
         iconZoom: formData.value.iconZoom,
+        iconOffsetX: formData.value.iconOffsetX,
+        iconOffsetY: formData.value.iconOffsetY,
         iconBackgroundColor: formData.value.iconBackgroundColor,
         extraLinks: formData.value.extraLinks || []
       })
@@ -136,6 +146,8 @@ function handleCancel() {
           <IconCustomization
             v-model:custom-icon="formData.customIcon"
             v-model:icon-zoom="formData.iconZoom"
+            v-model:icon-offset-x="formData.iconOffsetX"
+            v-model:icon-offset-y="formData.iconOffsetY"
             v-model:icon-background-color="formData.iconBackgroundColor"
             :url="formData.url"
           />
