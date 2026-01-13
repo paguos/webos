@@ -37,10 +37,19 @@ const tagFilterText = computed(() => {
   return parseTagQuery(localSearchQuery.value)
 })
 
-// Filter tags based on text after "tag:"
+// Filter tags based on search query
+// Show tag suggestions for ANY search query, not just "tag:" queries
 const filteredTagSuggestions = computed(() => {
-  if (!isTagQueryActive.value) return []
-  return filterTags(websitesStore.tags, tagFilterText.value)
+  const query = localSearchQuery.value.toLowerCase().trim()
+  if (!query) return []
+
+  // If already a tag query (starts with "tag:"), use existing logic
+  if (isTagQueryActive.value) {
+    return filterTags(websitesStore.tags, tagFilterText.value)
+  }
+
+  // Otherwise, filter tags by the full query (matches anywhere in tag name)
+  return filterTags(websitesStore.tags, query)
 })
 
 // Get the selected tag object if a complete tag query is active
@@ -80,8 +89,8 @@ function handleInput(e: Event) {
   // Update store with debounce (reduces re-renders in WebsiteGrid)
   updateSearchQuery(value)
 
-  // Show tag suggestions if typing "tag:" (immediate, no debounce for UI)
-  if (value.toLowerCase().startsWith('tag:')) {
+  // Show tag suggestions for any non-empty search query (immediate, no debounce for UI)
+  if (value.trim().length > 0) {
     showTagSuggestions.value = true
     highlightedIndex.value = -1
   } else {
@@ -266,7 +275,7 @@ function openSettings() {
         :style="suggestionsPosition"
       >
         <div class="suggestions-header">
-          <span class="suggestions-title">Tags</span>
+          <span class="suggestions-title">Categories</span>
           <span class="suggestions-count">
             {{ filteredTagSuggestions.length }}
           </span>
@@ -277,6 +286,7 @@ function openSettings() {
             :key="tag.id"
             class="suggestion-item"
             :class="{ highlighted: index === highlightedIndex }"
+            :style="{ '--tag-hover-bg': tag.color + '12', color: tag.color }"
             @click="selectTagSuggestion(tag)"
             @mouseenter="highlightedIndex = index"
           >
@@ -417,32 +427,48 @@ function openSettings() {
 
 /* Tag Suggestions Dropdown */
 .tag-suggestions {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-  max-height: 320px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(30px) saturate(1.8);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12),
+              0 2px 8px rgba(0, 0, 0, 0.08);
+  max-height: 360px;
   overflow: hidden;
   z-index: 2000;
   display: flex;
   flex-direction: column;
+
+  /* Entrance animation with spring physics */
+  animation: dropdownEnter 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-origin: top center;
+}
+
+@keyframes dropdownEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .suggestions-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .suggestions-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: rgba(0, 0, 0, 0.6);
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.5);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
 }
 
 .suggestions-count {
@@ -459,60 +485,83 @@ function openSettings() {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
-  border-radius: 8px;
+  gap: 14px;
+  padding: 14px 18px;
+  border-radius: 0;
   border: none;
   background: transparent;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all 150ms cubic-bezier(0.34, 1.56, 0.64, 1);
   text-align: left;
+  position: relative;
 }
 
-.suggestion-item:hover,
-.suggestion-item.highlighted {
-  background: rgba(0, 122, 255, 0.1);
+.suggestion-item::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 8px;
+  background: var(--tag-hover-bg, rgba(0, 122, 255, 0.08));
+  opacity: 0;
+  transition: opacity 150ms ease-out;
+  z-index: -1;
+}
+
+.suggestion-item:hover::before,
+.suggestion-item.highlighted::before {
+  opacity: 1;
 }
 
 .tag-color-dot {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   flex-shrink: 0;
+  transition: transform 150ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 150ms ease-out;
+}
+
+.suggestion-item:hover .tag-color-dot,
+.suggestion-item.highlighted .tag-color-dot {
+  transform: scale(1.15);
+  box-shadow: 0 0 12px currentColor, 0 0 4px currentColor;
 }
 
 .tag-name {
   font-size: 15px;
-  color: rgba(0, 0, 0, 0.9);
+  color: rgba(0, 0, 0, 0.95);
   font-weight: 500;
+  letter-spacing: -0.2px;
 }
 
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
   .tag-suggestions {
-    background: rgba(28, 28, 30, 0.95);
-    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(28, 28, 30, 0.85);
+    backdrop-filter: blur(30px) saturate(1.8);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4),
+                0 2px 8px rgba(0, 0, 0, 0.3);
   }
 
   .suggestions-header {
-    border-bottom-color: rgba(255, 255, 255, 0.1);
+    border-bottom-color: rgba(255, 255, 255, 0.08);
   }
 
   .suggestions-title {
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(255, 255, 255, 0.5);
   }
 
   .suggestions-count {
     color: rgba(255, 255, 255, 0.4);
   }
 
-  .suggestion-item:hover,
-  .suggestion-item.highlighted {
-    background: rgba(10, 132, 255, 0.2);
+  .suggestion-item::before {
+    background: var(--tag-hover-bg, rgba(10, 132, 255, 0.15));
   }
 
   .tag-name {
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(255, 255, 255, 0.95);
   }
 }
 </style>
