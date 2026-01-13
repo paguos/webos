@@ -21,7 +21,6 @@ const localSearchQuery = ref(uiStore.searchQuery)
 const showTagSuggestions = ref(false)
 const highlightedIndex = ref(-1)
 const positionUpdateTrigger = ref(0) // Used to trigger position recalculation
-const tagSuggestionsElement = ref<HTMLElement | null>(null)
 const dropdownHeight = ref(0)
 
 // Debounced search update to store (reduces re-renders)
