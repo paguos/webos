@@ -366,7 +366,7 @@ function openSettings() {
         :style="suggestionsPosition"
       >
         <div class="suggestions-header">
-          <span class="suggestions-title">Categories</span>
+          <span class="suggestions-title">Tags</span>
           <span class="suggestions-count">
             {{ filteredTagSuggestions.length }}
           </span>
