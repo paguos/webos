@@ -208,6 +208,9 @@ function updateGridOffset() {
 function attachObserverToDropdown() {
   const dropdown = document.querySelector('.tag-suggestions')
   if (dropdown && resizeObserver) {
+    // Disconnect any previous observations to avoid duplicates
+    resizeObserver.disconnect()
+    // Observe the new dropdown element
     resizeObserver.observe(dropdown as HTMLElement)
     // Force initial measurement
     const rect = dropdown.getBoundingClientRect()
@@ -229,6 +232,17 @@ watch(showTagSuggestions, async (isVisible) => {
     // Immediately clear offset when dropdown closes
     dropdownHeight.value = 0
     updateGridOffset()
+  }
+})
+
+// Also watch for dropdown content changes (when filtering changes)
+watch(filteredTagSuggestions, async () => {
+  if (showTagSuggestions.value) {
+    // Dropdown is visible but content changed, reattach observer
+    await nextTick()
+    setTimeout(() => {
+      attachObserverToDropdown()
+    }, 50)
   }
 })
 
