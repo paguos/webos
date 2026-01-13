@@ -88,6 +88,9 @@ function handleInput(e: Event) {
   const value = (e.target as HTMLInputElement).value
   localSearchQuery.value = value
 
+  // Clear preview when user types (they're searching manually now)
+  uiStore.clearPreviewTag()
+
   // Update store with debounce (reduces re-renders in WebsiteGrid)
   updateSearchQuery(value)
 
@@ -117,6 +120,8 @@ function selectTagSuggestion(tag: any) {
   uiStore.setSearchQuery(newQuery)
   showTagSuggestions.value = false
   highlightedIndex.value = -1
+  // Clear preview since we've committed the selection
+  uiStore.clearPreviewTag()
 
   // Keep focus on search input
   searchInput.value?.focus()
@@ -125,6 +130,7 @@ function selectTagSuggestion(tag: any) {
 function closeSuggestions() {
   showTagSuggestions.value = false
   highlightedIndex.value = -1
+  uiStore.clearPreviewTag()
 }
 
 function handleKeydownInSuggestions(e: KeyboardEvent) {
@@ -166,10 +172,20 @@ function handleKeydownInSuggestions(e: KeyboardEvent) {
         highlightedIndex.value + 1,
         suggestions.length - 1
       )
+      // Update preview to show websites for highlighted tag
+      if (highlightedIndex.value >= 0) {
+        uiStore.setPreviewTag(suggestions[highlightedIndex.value].id)
+      }
       break
     case 'ArrowUp':
       e.preventDefault()
       highlightedIndex.value = Math.max(highlightedIndex.value - 1, -1)
+      // Update preview to show websites for highlighted tag
+      if (highlightedIndex.value >= 0) {
+        uiStore.setPreviewTag(suggestions[highlightedIndex.value].id)
+      } else {
+        uiStore.clearPreviewTag()
+      }
       break
     case 'Enter':
       e.preventDefault()
@@ -363,7 +379,7 @@ function openSettings() {
             :class="{ highlighted: index === highlightedIndex }"
             :style="{ '--tag-hover-bg': tag.color + '12', color: tag.color }"
             @click="selectTagSuggestion(tag)"
-            @mouseenter="highlightedIndex = index"
+            @mouseenter="() => { highlightedIndex = index; uiStore.setPreviewTag(tag.id); }"
           >
             <span
               class="tag-color-dot"

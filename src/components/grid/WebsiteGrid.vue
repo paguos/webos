@@ -37,6 +37,14 @@ const localWebsites = computed({
 const filteredWebsites = computed(() => {
   const query = uiStore.searchQuery.toLowerCase().trim()
   const currentPageSites = websitesStore.currentPageWebsites
+  const previewTagId = uiStore.previewTagId
+
+  // If there's a preview tag (arrow key navigation), filter by that tag
+  if (previewTagId) {
+    return currentPageSites.filter((website: Website) =>
+      website.tagIds && website.tagIds.includes(previewTagId)
+    )
+  }
 
   if (!query) {
     return currentPageSites
