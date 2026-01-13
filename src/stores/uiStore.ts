@@ -6,6 +6,7 @@ import type { Website, Tag, ConfirmDialogConfig } from '../types'
 export const useUIStore = defineStore('ui', () => {
   // State
   const searchQuery: Ref<string> = ref('')
+  const previewTagId: Ref<string | null> = ref(null) // For arrow key navigation preview
   const isEditMode: Ref<boolean> = ref(false)
   const showWebsiteForm: Ref<boolean> = ref(false)
   const showSettingsModal: Ref<boolean> = ref(false)
@@ -33,6 +34,15 @@ export const useUIStore = defineStore('ui', () => {
 
   function clearSearch(): void {
     searchQuery.value = ''
+    previewTagId.value = null
+  }
+
+  function setPreviewTag(tagId: string | null): void {
+    previewTagId.value = tagId
+  }
+
+  function clearPreviewTag(): void {
+    previewTagId.value = null
   }
 
   function openWebsiteForm(website: Website | null = null): void {
@@ -132,6 +142,7 @@ export const useUIStore = defineStore('ui', () => {
   return {
     // State
     searchQuery,
+    previewTagId,
     isEditMode,
     showWebsiteForm,
     showSettingsModal,
@@ -149,6 +160,8 @@ export const useUIStore = defineStore('ui', () => {
     // Actions
     setSearchQuery,
     clearSearch,
+    setPreviewTag,
+    clearPreviewTag,
     enterEditMode,
     exitEditMode,
     toggleEditMode,

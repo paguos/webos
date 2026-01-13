@@ -37,6 +37,14 @@ const localWebsites = computed({
 const filteredWebsites = computed(() => {
   const query = uiStore.searchQuery.toLowerCase().trim()
   const currentPageSites = websitesStore.currentPageWebsites
+  const previewTagId = uiStore.previewTagId
+
+  // If there's a preview tag (arrow key navigation), filter by that tag
+  if (previewTagId) {
+    return currentPageSites.filter((website: Website) =>
+      website.tagIds && website.tagIds.includes(previewTagId)
+    )
+  }
 
   if (!query) {
     return currentPageSites
@@ -190,10 +198,15 @@ onUnmounted(() => {
   align-items: flex-start;
   justify-content: center;
   padding: var(--grid-padding);
-  padding-top: 140px;
+  padding-top: calc(140px + var(--dropdown-offset, 0px));
   padding-bottom: 100px;
   overflow-x: hidden;
   overflow-y: auto;
+  position: relative;
+
+  /* Spring animation for grid displacement with 50ms delay for choreographed motion */
+  transition: padding-top 350ms cubic-bezier(0.34, 1.56, 0.64, 1) 50ms;
+  will-change: padding-top;
 }
 
 .website-grid {
@@ -374,14 +387,14 @@ onUnmounted(() => {
 
 @media (max-width: 1024px) {
   .grid-container {
-    padding-top: 140px;
+    padding-top: calc(140px + var(--dropdown-offset, 0px));
     padding-bottom: 80px;
   }
 }
 
 @media (max-width: 640px) {
   .grid-container {
-    padding-top: 110px;
+    padding-top: calc(110px + var(--dropdown-offset, 0px));
     padding-bottom: 70px;
   }
 

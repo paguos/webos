@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useUIStore } from '../../stores/uiStore.ts'
 import { useWebsitesStore } from '../../stores/websitesStore.ts'
 import { useDebouncedFn } from '../../composables/useDebounce'
@@ -21,6 +21,7 @@ const localSearchQuery = ref(uiStore.searchQuery)
 const showTagSuggestions = ref(false)
 const highlightedIndex = ref(-1)
 const positionUpdateTrigger = ref(0) // Used to trigger position recalculation
+const dropdownHeight = ref(0)
 
 // Debounced search update to store (reduces re-renders)
 const updateSearchQuery = useDebouncedFn((value: string) => {
@@ -37,10 +38,19 @@ const tagFilterText = computed(() => {
   return parseTagQuery(localSearchQuery.value)
 })
 
-// Filter tags based on text after "tag:"
+// Filter tags based on search query
+// Show tag suggestions for ANY search query, not just "tag:" queries
 const filteredTagSuggestions = computed(() => {
-  if (!isTagQueryActive.value) return []
-  return filterTags(websitesStore.tags, tagFilterText.value)
+  const query = localSearchQuery.value.toLowerCase().trim()
+  if (!query) return []
+
+  // If already a tag query (starts with "tag:"), use existing logic
+  if (isTagQueryActive.value) {
+    return filterTags(websitesStore.tags, tagFilterText.value)
+  }
+
+  // Otherwise, filter tags by the full query (matches anywhere in tag name)
+  return filterTags(websitesStore.tags, query)
 })
 
 // Get the selected tag object if a complete tag query is active
@@ -77,11 +87,14 @@ function handleInput(e: Event) {
   const value = (e.target as HTMLInputElement).value
   localSearchQuery.value = value
 
+  // Clear preview when user types (they're searching manually now)
+  uiStore.clearPreviewTag()
+
   // Update store with debounce (reduces re-renders in WebsiteGrid)
   updateSearchQuery(value)
 
-  // Show tag suggestions if typing "tag:" (immediate, no debounce for UI)
-  if (value.toLowerCase().startsWith('tag:')) {
+  // Show tag suggestions for any non-empty search query (immediate, no debounce for UI)
+  if (value.trim().length > 0) {
     showTagSuggestions.value = true
     highlightedIndex.value = -1
   } else {
@@ -106,6 +119,8 @@ function selectTagSuggestion(tag: any) {
   uiStore.setSearchQuery(newQuery)
   showTagSuggestions.value = false
   highlightedIndex.value = -1
+  // Clear preview since we've committed the selection
+  uiStore.clearPreviewTag()
 
   // Keep focus on search input
   searchInput.value?.focus()
@@ -114,6 +129,7 @@ function selectTagSuggestion(tag: any) {
 function closeSuggestions() {
   showTagSuggestions.value = false
   highlightedIndex.value = -1
+  uiStore.clearPreviewTag()
 }
 
 function handleKeydownInSuggestions(e: KeyboardEvent) {
@@ -155,10 +171,20 @@ function handleKeydownInSuggestions(e: KeyboardEvent) {
         highlightedIndex.value + 1,
         suggestions.length - 1
       )
+      // Update preview to show websites for highlighted tag
+      if (highlightedIndex.value >= 0) {
+        uiStore.setPreviewTag(suggestions[highlightedIndex.value].id)
+      }
       break
     case 'ArrowUp':
       e.preventDefault()
       highlightedIndex.value = Math.max(highlightedIndex.value - 1, -1)
+      // Update preview to show websites for highlighted tag
+      if (highlightedIndex.value >= 0) {
+        uiStore.setPreviewTag(suggestions[highlightedIndex.value].id)
+      } else {
+        uiStore.clearPreviewTag()
+      }
       break
     case 'Enter':
       e.preventDefault()
@@ -179,11 +205,75 @@ function handleClickOutside(event: MouseEvent) {
   }
 }
 
+// Watch for dropdown visibility and height changes
+let resizeObserver: ResizeObserver | null = null
+
+// Update CSS custom property for grid displacement
+function updateGridOffset() {
+  if (showTagSuggestions.value && dropdownHeight.value > 0) {
+    const offset = `${dropdownHeight.value + 16}px`
+    document.documentElement.style.setProperty('--dropdown-offset', offset)
+    document.documentElement.style.setProperty('--has-dropdown', '1')
+  } else {
+    document.documentElement.style.setProperty('--dropdown-offset', '0px')
+    document.documentElement.style.setProperty('--has-dropdown', '0')
+  }
+}
+
+function attachObserverToDropdown() {
+  const dropdown = document.querySelector('.tag-suggestions')
+  if (dropdown && resizeObserver) {
+    // Disconnect any previous observations to avoid duplicates
+    resizeObserver.disconnect()
+    // Observe the new dropdown element
+    resizeObserver.observe(dropdown as HTMLElement)
+    // Force initial measurement
+    const rect = dropdown.getBoundingClientRect()
+    dropdownHeight.value = rect.height
+    updateGridOffset()
+  }
+}
+
+// Watch for dropdown visibility to attach/detach observer
+watch(showTagSuggestions, async (isVisible) => {
+  if (isVisible) {
+    // Use nextTick to ensure dropdown is rendered in the DOM
+    await nextTick()
+    // Add small delay for Teleport to complete
+    setTimeout(() => {
+      attachObserverToDropdown()
+    }, 100)
+  } else {
+    // Immediately clear offset when dropdown closes
+    dropdownHeight.value = 0
+    updateGridOffset()
+  }
+})
+
+// Also watch for dropdown content changes (when filtering changes)
+watch(filteredTagSuggestions, async () => {
+  if (showTagSuggestions.value) {
+    // Dropdown is visible but content changed, reattach observer
+    await nextTick()
+    setTimeout(() => {
+      attachObserverToDropdown()
+    }, 50)
+  }
+})
+
 onMounted(() => {
   window.addEventListener('keydown', handleKeydownInSuggestions)
   document.addEventListener('click', handleClickOutside)
   window.addEventListener('resize', updateSuggestionsPosition)
   window.addEventListener('scroll', updateSuggestionsPosition, true) // Use capture for all scroll events
+
+  // Create ResizeObserver for dropdown height tracking
+  resizeObserver = new ResizeObserver((entries) => {
+    for (const entry of entries) {
+      dropdownHeight.value = entry.contentRect.height
+      updateGridOffset()
+    }
+  })
 })
 
 onUnmounted(() => {
@@ -191,6 +281,15 @@ onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
   window.removeEventListener('resize', updateSuggestionsPosition)
   window.removeEventListener('scroll', updateSuggestionsPosition, true)
+
+  // Cleanup ResizeObserver
+  if (resizeObserver) {
+    resizeObserver.disconnect()
+  }
+
+  // Reset CSS custom properties
+  document.documentElement.style.setProperty('--dropdown-offset', '0px')
+  document.documentElement.style.setProperty('--has-dropdown', '0')
 })
 
 function openSettings() {
@@ -277,8 +376,9 @@ function openSettings() {
             :key="tag.id"
             class="suggestion-item"
             :class="{ highlighted: index === highlightedIndex }"
+            :style="{ '--tag-hover-bg': tag.color + '12', color: tag.color }"
             @click="selectTagSuggestion(tag)"
-            @mouseenter="highlightedIndex = index"
+            @mouseenter="() => { highlightedIndex = index; uiStore.setPreviewTag(tag.id); }"
           >
             <span
               class="tag-color-dot"
@@ -417,32 +517,64 @@ function openSettings() {
 
 /* Tag Suggestions Dropdown */
 .tag-suggestions {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-  max-height: 320px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(30px) saturate(1.8);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12),
+              0 2px 8px rgba(0, 0, 0, 0.08);
+  max-height: 360px;
   overflow: hidden;
   z-index: 2000;
   display: flex;
   flex-direction: column;
+
+  /* Entrance animation with spring physics */
+  animation: dropdownEnter 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-origin: top center;
+}
+
+@keyframes dropdownEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Exit animation when closing */
+.tag-suggestions.closing {
+  animation: dropdownExit 150ms ease-out forwards;
+}
+
+@keyframes dropdownExit {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
 }
 
 .suggestions-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .suggestions-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: rgba(0, 0, 0, 0.6);
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.5);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
 }
 
 .suggestions-count {
@@ -459,60 +591,83 @@ function openSettings() {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
-  border-radius: 8px;
+  gap: 14px;
+  padding: 14px 18px;
+  border-radius: 0;
   border: none;
   background: transparent;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all 150ms cubic-bezier(0.34, 1.56, 0.64, 1);
   text-align: left;
+  position: relative;
 }
 
-.suggestion-item:hover,
-.suggestion-item.highlighted {
-  background: rgba(0, 122, 255, 0.1);
+.suggestion-item::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 8px;
+  background: var(--tag-hover-bg, rgba(0, 122, 255, 0.08));
+  opacity: 0;
+  transition: opacity 150ms ease-out;
+  z-index: -1;
+}
+
+.suggestion-item:hover::before,
+.suggestion-item.highlighted::before {
+  opacity: 1;
 }
 
 .tag-color-dot {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   flex-shrink: 0;
+  transition: transform 150ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 150ms ease-out;
+}
+
+.suggestion-item:hover .tag-color-dot,
+.suggestion-item.highlighted .tag-color-dot {
+  transform: scale(1.15);
+  box-shadow: 0 0 12px currentColor, 0 0 4px currentColor;
 }
 
 .tag-name {
   font-size: 15px;
-  color: rgba(0, 0, 0, 0.9);
+  color: rgba(0, 0, 0, 0.95);
   font-weight: 500;
+  letter-spacing: -0.2px;
 }
 
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
   .tag-suggestions {
-    background: rgba(28, 28, 30, 0.95);
-    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(28, 28, 30, 0.85);
+    backdrop-filter: blur(30px) saturate(1.8);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4),
+                0 2px 8px rgba(0, 0, 0, 0.3);
   }
 
   .suggestions-header {
-    border-bottom-color: rgba(255, 255, 255, 0.1);
+    border-bottom-color: rgba(255, 255, 255, 0.08);
   }
 
   .suggestions-title {
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(255, 255, 255, 0.5);
   }
 
   .suggestions-count {
     color: rgba(255, 255, 255, 0.4);
   }
 
-  .suggestion-item:hover,
-  .suggestion-item.highlighted {
-    background: rgba(10, 132, 255, 0.2);
+  .suggestion-item::before {
+    background: var(--tag-hover-bg, rgba(10, 132, 255, 0.15));
   }
 
   .tag-name {
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(255, 255, 255, 0.95);
   }
 }
 </style>

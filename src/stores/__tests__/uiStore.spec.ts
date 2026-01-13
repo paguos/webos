@@ -13,6 +13,7 @@ describe('uiStore', () => {
       const store = useUIStore()
 
       expect(store.searchQuery).toBe('')
+      expect(store.previewTagId).toBeNull()
       expect(store.isEditMode).toBe(false)
       expect(store.showWebsiteForm).toBe(false)
       expect(store.showSettingsModal).toBe(false)
@@ -39,6 +40,61 @@ describe('uiStore', () => {
 
       store.clearSearch()
       expect(store.searchQuery).toBe('')
+    })
+
+    it('should clear both search query and preview tag', () => {
+      const store = useUIStore()
+
+      store.setSearchQuery('test query')
+      store.setPreviewTag('tag-123')
+      expect(store.searchQuery).toBe('test query')
+      expect(store.previewTagId).toBe('tag-123')
+
+      store.clearSearch()
+      expect(store.searchQuery).toBe('')
+      expect(store.previewTagId).toBeNull()
+    })
+  })
+
+  describe('preview tag functionality', () => {
+    it('should set preview tag ID', () => {
+      const store = useUIStore()
+
+      store.setPreviewTag('tag-123')
+      expect(store.previewTagId).toBe('tag-123')
+    })
+
+    it('should clear preview tag ID', () => {
+      const store = useUIStore()
+
+      store.setPreviewTag('tag-123')
+      expect(store.previewTagId).toBe('tag-123')
+
+      store.clearPreviewTag()
+      expect(store.previewTagId).toBeNull()
+    })
+
+    it('should update preview tag when navigating', () => {
+      const store = useUIStore()
+
+      store.setPreviewTag('tag-1')
+      expect(store.previewTagId).toBe('tag-1')
+
+      store.setPreviewTag('tag-2')
+      expect(store.previewTagId).toBe('tag-2')
+
+      store.setPreviewTag('tag-3')
+      expect(store.previewTagId).toBe('tag-3')
+    })
+
+    it('should set preview tag to null explicitly', () => {
+      const store = useUIStore()
+
+      store.setPreviewTag('tag-123')
+      expect(store.previewTagId).toBe('tag-123')
+
+      store.setPreviewTag(null)
+      expect(store.previewTagId).toBeNull()
     })
   })
 
