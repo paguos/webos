@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useUIStore } from '../../stores/uiStore.ts'
 import { useWebsitesStore } from '../../stores/websitesStore.ts'
 import { useDebouncedFn } from '../../composables/useDebounce'
@@ -21,6 +21,8 @@ const localSearchQuery = ref(uiStore.searchQuery)
 const showTagSuggestions = ref(false)
 const highlightedIndex = ref(-1)
 const positionUpdateTrigger = ref(0) // Used to trigger position recalculation
+const tagSuggestionsElement = ref<HTMLElement | null>(null)
+const dropdownHeight = ref(0)
 
 // Debounced search update to store (reduces re-renders)
 const updateSearchQuery = useDebouncedFn((value: string) => {
@@ -188,11 +190,61 @@ function handleClickOutside(event: MouseEvent) {
   }
 }
 
+// Watch for dropdown visibility and height changes
+let resizeObserver: ResizeObserver | null = null
+
+// Update CSS custom property for grid displacement
+function updateGridOffset() {
+  if (showTagSuggestions.value && dropdownHeight.value > 0) {
+    const offset = `${dropdownHeight.value + 16}px`
+    document.documentElement.style.setProperty('--dropdown-offset', offset)
+    document.documentElement.style.setProperty('--has-dropdown', '1')
+  } else {
+    document.documentElement.style.setProperty('--dropdown-offset', '0px')
+    document.documentElement.style.setProperty('--has-dropdown', '0')
+  }
+}
+
+function attachObserverToDropdown() {
+  const dropdown = document.querySelector('.tag-suggestions')
+  if (dropdown && resizeObserver) {
+    resizeObserver.observe(dropdown as HTMLElement)
+    // Force initial measurement
+    const rect = dropdown.getBoundingClientRect()
+    dropdownHeight.value = rect.height
+    updateGridOffset()
+  }
+}
+
+// Watch for dropdown visibility to attach/detach observer
+watch(showTagSuggestions, async (isVisible) => {
+  if (isVisible) {
+    // Use nextTick to ensure dropdown is rendered in the DOM
+    await nextTick()
+    // Add small delay for Teleport to complete
+    setTimeout(() => {
+      attachObserverToDropdown()
+    }, 100)
+  } else {
+    // Immediately clear offset when dropdown closes
+    dropdownHeight.value = 0
+    updateGridOffset()
+  }
+})
+
 onMounted(() => {
   window.addEventListener('keydown', handleKeydownInSuggestions)
   document.addEventListener('click', handleClickOutside)
   window.addEventListener('resize', updateSuggestionsPosition)
   window.addEventListener('scroll', updateSuggestionsPosition, true) // Use capture for all scroll events
+
+  // Create ResizeObserver for dropdown height tracking
+  resizeObserver = new ResizeObserver((entries) => {
+    for (const entry of entries) {
+      dropdownHeight.value = entry.contentRect.height
+      updateGridOffset()
+    }
+  })
 })
 
 onUnmounted(() => {
@@ -200,6 +252,15 @@ onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
   window.removeEventListener('resize', updateSuggestionsPosition)
   window.removeEventListener('scroll', updateSuggestionsPosition, true)
+
+  // Cleanup ResizeObserver
+  if (resizeObserver) {
+    resizeObserver.disconnect()
+  }
+
+  // Reset CSS custom properties
+  document.documentElement.style.setProperty('--dropdown-offset', '0px')
+  document.documentElement.style.setProperty('--has-dropdown', '0')
 })
 
 function openSettings() {
@@ -452,6 +513,22 @@ function openSettings() {
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+
+/* Exit animation when closing */
+.tag-suggestions.closing {
+  animation: dropdownExit 150ms ease-out forwards;
+}
+
+@keyframes dropdownExit {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
   }
 }
 
